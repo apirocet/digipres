@@ -25,16 +25,19 @@
 declare -a formats=("mp3" "wav" "pdf")
 
 # Path to mpck (Checkmate mp3 checker)
-mp3checker='/usr/local/bin/mpck -q'
-mp3okstr=': Ok'
+declare -a mp3checker=('/usr/local/bin/mpck -q')
+declare -a mp3okstr=(': Ok')
+declare -a mp3label=('MP3')
 
 # Path to jhove (JHove WAV validator)
-wavchecker='/usr/local/jhove/jhove -m WAVE-hul '
-wavokstr='Status: Well-Formed and valid'
+declare -a wavchecker=('/usr/local/jhove/jhove -m WAVE-hul')
+declare -a wavokstr=('Status: Well-Formed and valid')
+declare -a wavlabel=('WAV')
 
-# Path to verapdf (VeraPDF PDF/A validator)
-pdfchecker='/usr/local/verapdf/verapdf'
-pdfokstr='isCompliant="true"'
+# Path to verapdf, JHove (VeraPDF PDF/A validator, Jhove PDF validator)
+declare -a pdfchecker=('/usr/local/verapdf/verapdf' '/usr/local/jhove/jhove -m PDF-hul')
+declare -a pdfokstr=('isCompliant="true"' 'Status: Well-Formed and valid')
+declare -a pdflabel=('PDF/A' 'PDF')
 
 # Default status is OK
 final_status=0
@@ -58,16 +61,7 @@ check_file () {
     local file="$3"
 
     $checker "$file" | grep "$okstr" >/dev/null
-    local status=$?
-
-    if [ $status -eq 0 ]
-    then
-        echo "$file: OK"
-    else
-        echo "$file: FAIL"
-        errfiles=("${errfiles[@]}" "$file")
-        final_status=1
-    fi
+    return $?
 }
 
 #-----------------------------------------------------------------------#
@@ -86,11 +80,34 @@ fi
 for fmt in "${formats[@]}"
 do
    echo "Checking ${fmt}s..."
-   fmtchecker="${fmt}checker"
-   fmtokstr="${fmt}okstr"
    while read archfile
    do
-       check_file "${!fmtchecker}" "${!fmtokstr}" "${archfile}"
+       
+       fmtchecker="${fmt}checker"
+       fmtokstr="${fmt}okstr"
+       fmtlabel="${fmt}label"
+       checkcount=$(($(eval "echo \${#${fmt}checker[@]}")-1))
+       for i in $(eval "echo \${!${fmt}checker[@]}")
+       do
+           checker=${fmtchecker}[$i]
+           okstr=${fmtokstr}[$i]
+           label=${fmtlabel}[$i]
+           check_file "${!checker}" "${!okstr}" "${archfile}"
+           if [ $? -ne 0 ]
+           then
+               if [ $i -lt $checkcount ]
+               then
+                   echo "  WARNING: ${archfile} failed ${!label} validation.  Trying next validation." 
+               else 
+                   echo " ${archfile} ${!label}: FAIL"
+                   errfiles=("${errfiles[@]}" "${archfile}")
+                   final_status=1
+               fi
+           else
+               echo "${archfile} ${!label}: OK"
+               break
+           fi
+       done
    done < <(find "${ckdir}" -iname "*.${fmt}")
 done
 
