@@ -1,12 +1,8 @@
 package org.apirocet.digipres;
 
-import org.apirocet.digipres.BagWriter;
-import org.apirocet.digipres.BagVerifier;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
 
-import java.io.File;
 import java.util.concurrent.Callable;
 
 /**
@@ -20,20 +16,24 @@ import java.util.concurrent.Callable;
 
 @Command(name = "bagmanager", mixinStandardHelpOptions = true,
         sortOptions = false,
-        version = "BagIt Bag Manager - 1.0",
+        version = "BagIt Bag Manager 1.0",
         description = "Command line BagIt bag manager",
+        synopsisSubcommandLabel = "( write | verify )",
         subcommands = { BagWriter.class, BagVerifier.class })
 public class BagManager implements Callable<Integer> {
+
+    @CommandLine.Spec
+    CommandLine.Model.CommandSpec spec;
+
     public static void main( String... args ) {
         int exitCode = new CommandLine(new BagManager()).execute(args);
         System.exit(exitCode);
     }
 
-    @Parameters(arity = "1", index = "0", description = "The bag directory")
-    File bagdir;
-
     @Override
     public Integer call() throws Exception {
-        return 0;
+        // if the command was invoked without subcommand, show the usage help
+        spec.commandLine().usage(System.err);
+        return 1;
     }
 }
