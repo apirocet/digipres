@@ -1,7 +1,6 @@
 package org.apirocet.digipres;
 
 import picocli.CommandLine;
-import picocli.CommandLine.Command;
 
 import java.util.concurrent.Callable;
 
@@ -14,12 +13,12 @@ import java.util.concurrent.Callable;
  * @since 2019-12-20
  */
 
-@Command(name = "bagmanager", mixinStandardHelpOptions = true,
+@CommandLine.Command(name = "bagmanager", mixinStandardHelpOptions = true,
         sortOptions = false,
         version = "BagIt Bag Manager 1.0",
         description = "Command line BagIt bag manager",
         synopsisSubcommandLabel = "( write | verify )",
-        subcommands = { BagWriter.class, BagVerifier.class })
+        subcommands = { CmdBagWriter.class, CmdBagVerifier.class })
 public class BagManager implements Callable<Integer> {
 
     @CommandLine.Spec
