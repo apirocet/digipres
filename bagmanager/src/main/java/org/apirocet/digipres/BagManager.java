@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
         version = "BagIt Bag Manager 1.0",
         description = "Command line BagIt bag manager",
         synopsisSubcommandLabel = "( write | verify )",
-        subcommands = { CmdBagWriter.class, CmdBagVerifier.class })
+        subcommands = { CmdBagManagerWriter.class, CmdBagManagerVerifier.class })
 public class BagManager implements Callable<Integer> {
 
     @CommandLine.Spec

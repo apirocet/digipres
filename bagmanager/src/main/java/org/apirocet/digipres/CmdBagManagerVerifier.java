@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "verify", description = "verify the bag")
-public class CmdBagVerifier implements Callable<Integer> {
+public class CmdBagManagerVerifier implements Callable<Integer> {
 
     @CommandLine.Parameters(paramLabel = "<bag directory>", description = "the path to the bag directory")
     File bagdir;
