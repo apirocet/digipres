@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
@@ -20,16 +21,39 @@ public class BagManagerWriter {
     private static final Logger LOGGER = getLogger(BagManagerWriter.class);
 
     private File bagdir;
+    private File outbagdir;
 
     public BagManagerWriter(File bagdir) {
         this.bagdir = bagdir;
     }
 
     public Integer write() throws IOException, NoSuchAlgorithmException {
+        if (outbagdir == null) {
+            return writeInPlace();
+        } else {
+            return writeElsewhere();
+        }
+    }
 
-        // TODO:  writes bag info in-place!
-        LOGGER.info("Creating bag from contents at '{}'", bagdir.getAbsolutePath());
+    private Integer writeElsewhere() {
+        return 0;
+    }
+
+    private Integer writeInPlace() throws NoSuchAlgorithmException, IOException {
         Path folder = Paths.get(bagdir.getAbsolutePath());
+
+        if (Files.notExists(folder)) {
+            LOGGER.error("Cannot create in-place bag at '{}': directory does not exist", bagdir);
+            return 1;
+        }
+
+        if (isBag(folder)) {
+            LOGGER.error("Cannot create in-place bag at '{}': bag already exists at this location.", bagdir);
+            return 1;
+        }
+
+        LOGGER.info("Creating bag in place from contents at '{}'", bagdir.getAbsolutePath());
+
         StandardSupportedAlgorithms algorithm = StandardSupportedAlgorithms.SHA1;
         boolean includeHiddenFiles = false;
         Bag bag = BagCreator.bagInPlace(folder, Arrays.asList(algorithm), includeHiddenFiles);
@@ -53,5 +77,12 @@ public class BagManagerWriter {
         //Path outputDir = Paths.get("/var/tmp/tt2");
         //BagWriter.write(bag, outputDir);
         return 0;
+    }
+
+    private Boolean isBag(Path folder) {
+        String bagitfile = File.separatorChar + "bagit.txt";
+        Path bag = folder.resolve(bagitfile);
+        System.out.println(bag);
+        return Files.exists(bag);
     }
 }
