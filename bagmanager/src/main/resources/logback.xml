@@ -7,8 +7,15 @@
         </encoder>
     </appender>
 
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%m%n</pattern>
+        </encoder>
+    </appender>
+
     <logger name="org.apirocet.digipres" additivity="false" level="INFO">
         <appender-ref ref="FILE"/>
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
     <root additivity="false" level="WARN">
