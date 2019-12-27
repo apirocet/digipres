@@ -24,6 +24,9 @@ public class BagManager implements Callable<Integer> {
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
 
+    @CommandLine.Option(names = {"-l", "--logfile"}, description = "path to log file (default is bagmanager.log in current directory)")
+    String logfile;
+
     public static void main( String... args ) {
         int exitCode = new CommandLine(new BagManager()).execute(args);
         System.exit(exitCode);
