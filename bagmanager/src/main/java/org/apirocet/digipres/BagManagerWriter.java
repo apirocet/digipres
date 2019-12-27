@@ -22,12 +22,14 @@ public class BagManagerWriter {
 
     private File bagdir;
     private File outbagdir;
+    private StandardSupportedAlgorithms algorithm;
 
-    public BagManagerWriter(File bagdir) {
+    public BagManagerWriter(File bagdir, StandardSupportedAlgorithms algorithm) {
         this.bagdir = bagdir;
+        this.algorithm = algorithm;
     }
 
-    public Integer write() throws IOException, NoSuchAlgorithmException {
+    public Integer write() {
         if (outbagdir == null) {
             return writeInPlace();
         } else {
@@ -39,24 +41,40 @@ public class BagManagerWriter {
         return 0;
     }
 
-    private Integer writeInPlace() throws NoSuchAlgorithmException, IOException {
+    private Integer writeInPlace() {
         Path folder = Paths.get(bagdir.getAbsolutePath());
 
         if (Files.notExists(folder)) {
+            System.out.println("Cannot create in-place bag at '" + bagdir +"': directory does not exist");
             LOGGER.error("Cannot create in-place bag at '{}': directory does not exist", bagdir);
             return 1;
         }
 
         if (isBag(folder)) {
-            LOGGER.error("Cannot create in-place bag at '{}': bag already exists at this location.", bagdir);
+            System.out.println("Cannot create in-place bag at '" + bagdir +"': bag already exists at this location");
+            LOGGER.error("Cannot create in-place bag at '{}': bag already exists at this location", bagdir);
             return 1;
         }
 
-        LOGGER.info("Creating bag in place from contents at '{}'", bagdir.getAbsolutePath());
+        System.out.println("Creating bag in place from contents at '" + bagdir.getAbsolutePath() + "' with " + algorithm.getMessageDigestName() + " checksums");
+        LOGGER.info("Creating bag in place from contents at '{}' with '{}' checksums", bagdir.getAbsolutePath(), algorithm.getMessageDigestName());
 
-        StandardSupportedAlgorithms algorithm = StandardSupportedAlgorithms.SHA1;
         boolean includeHiddenFiles = false;
-        Bag bag = BagCreator.bagInPlace(folder, Arrays.asList(algorithm), includeHiddenFiles);
+        Bag bag = null;
+        try {
+            bag = BagCreator.bagInPlace(folder, Arrays.asList(algorithm), includeHiddenFiles);
+        } catch (NoSuchAlgorithmException ex) {
+            System.err.println("Cannot create bag with checksum algorithm '" + algorithm.getMessageDigestName() +"': " + ex.getMessage());
+            LOGGER.error("Cannot create bag with checksum algorithm '{}': {}", algorithm.getMessageDigestName(), ex.getMessage());
+            return 1;
+        } catch (IOException ex) {
+            System.err.println("Cannot create in-place bag at '" + folder +"': " + ex.getMessage());
+            LOGGER.error("Cannot create in-place bag at '{}': {}", folder, ex.getMessage());
+            return 1;
+        }
+
+        System.out.println("Bag created at '" + bagdir.getAbsolutePath() + "'");
+        LOGGER.info("Bag created at '{}'", bagdir.getAbsolutePath());
 
         LOGGER.info("Verifying complete bag from contents at '{}'", bagdir.getAbsolutePath());
         BagVerifier bv = new BagVerifier();
@@ -80,7 +98,7 @@ public class BagManagerWriter {
     }
 
     private Boolean isBag(Path folder) {
-        String bagitfile = File.separatorChar + "bagit.txt";
+        String bagitfile = folder.toString() + File.separatorChar + "bagit.txt";
         Path bag = folder.resolve(bagitfile);
         System.out.println(bag);
         return Files.exists(bag);
