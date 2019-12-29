@@ -1,16 +1,21 @@
 package org.apirocet.digipres.model;
 
+import gov.loc.repository.bagit.hash.Hasher;
 import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BagManager {
 
     private File bagdir;
     private File srcdir;
     private File metadataFile;
+    private Map<String,String> metadataFields = new HashMap<>();
     private StandardSupportedAlgorithms algorithm = StandardSupportedAlgorithms.MD5;
     private boolean replace = false;
+
 
     public File getBagdir() {
         return bagdir;
@@ -34,6 +39,14 @@ public class BagManager {
 
     public void setMetadataFile(File metadataFile) {
         this.metadataFile = metadataFile;
+    }
+
+    public Map<String, String> getMetadataFields() {
+        return metadataFields;
+    }
+
+    public void setMetadataFields(Map<String, String> metadataFields) {
+        this.metadataFields = metadataFields;
     }
 
     public StandardSupportedAlgorithms getAlgorithm() {

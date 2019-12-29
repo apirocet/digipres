@@ -64,18 +64,13 @@ public class BagManagerWriter {
 
         try {
             MetadataManager mdm = new MetadataManager();
-            Metadata md;
-            if (metadataFile != null) {
-                md = mdm.setMetadata(folder.toFile(), metadataFile);
-            } else {
-                md = mdm.setMetadata(folder.toFile());
-            }
+            Metadata md = mdm.setMetadata(bm);
             bag = BagCreator.bagInPlace(folder, Collections.singletonList(algorithm), includeHiddenFiles, md);
         } catch (NoSuchAlgorithmException ex) {
             LOGGER.error("Cannot create bag with checksum algorithm {}: {}", algorithm.getMessageDigestName(), ex.getMessage());
             return false;
         } catch (IOException ex) {
-            LOGGER.error("Cannot create in-place bag at '{}': {}", folder, ex.getMessage());
+            LOGGER.error("Cannot create in-place bag:", ex);
             return false;
         }
 

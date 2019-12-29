@@ -1,7 +1,9 @@
 package org.apirocet.digipres;
 
+import gov.loc.repository.bagit.domain.Bag;
 import gov.loc.repository.bagit.domain.Metadata;
 import gov.loc.repository.bagit.util.PathUtils;
+import org.apirocet.digipres.model.BagManager;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -10,6 +12,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.StandardOpenOption;
+import java.util.Map;
 import java.util.Properties;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -18,25 +21,46 @@ public class MetadataManager {
 
     private static final Logger LOGGER = getLogger(MetadataManager.class);
 
-    private Properties metadataProperties = new Properties();
+
     private Metadata metadata = new Metadata();
+    private File bagdir;
 
     public MetadataManager() { }
 
-    public Metadata setMetadata(File bagdir, File mdproperties) throws IOException {
-        try (final FileChannel channel = FileChannel.open(mdproperties.toPath(), StandardOpenOption.READ);
+    public Metadata setMetadata(BagManager bm) throws IOException {
+        bagdir = bm.getBagdir();
+
+        if (bm.getMetadataFile() != null) {
+            setFileMetadata(bm.getMetadataFile());
+        }
+
+        if (bm.getMetadataFields() != null && ! bm.getMetadataFields().isEmpty()) {
+            setProvidedMetadata(bm.getMetadataFields());
+        }
+
+        setDefaultMetadata();
+
+        return metadata;
+    }
+
+    private void setFileMetadata(File metadataFile) throws IOException {
+        LOGGER.info("Setting metadata from file '{}'", metadataFile);
+        Properties metadataProperties = new Properties();
+        try (final FileChannel channel = FileChannel.open(metadataFile.toPath(), StandardOpenOption.READ);
              final FileLock lock = channel.lock(0L, Long.MAX_VALUE, true)) {
             metadataProperties.load(Channels.newInputStream(channel));
         }
         metadataProperties.forEach((key, value) -> metadata.add((String) key, (String) value));
-
-        return setMetadata(bagdir);
     }
 
-    public Metadata setMetadata(File bagdir) throws IOException {
+    private void setProvidedMetadata(Map<String, String> metadataFields) {
+        LOGGER.info("Setting metadata from provided command line values");
+        metadataFields.forEach((key, value) -> metadata.add((String) key, (String) value));
+    }
+
+    private void setDefaultMetadata() throws IOException {
         String size = getBagSize(bagdir);
         metadata.add("Bag-Size", size);
-        return metadata;
     }
 
     private String getBagSize(File bagdir) throws IOException {

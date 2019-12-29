@@ -7,6 +7,7 @@ import picocli.CommandLine;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "write", description = "write/update the bag")
@@ -24,8 +25,12 @@ public class CmdBagManagerWriter implements Callable<Integer> {
     StandardSupportedAlgorithms algorithm;
 
     @CommandLine.Option(names = {"-m", "--metadata-file"},
-            description = "path to supplementary bag-info.txt metadata file.")
+            description = "path to optional supplementary bag-info.txt metadata file.")
     File metadataFile;
+
+    @CommandLine.Option(names = "--metadata-fields", split = ",",
+            description ="additional bag-info.txt metadata fields, expressed as key=value pairs, separated by a comma.  Example:  --metadata-fields External-Identifier=MyID-0001,Internal-Sender-Identifier=/path/to/MID-0001" )
+    Map<String, String> metadataFields;
 
     @CommandLine.ArgGroup(exclusive = false)
     ElsewhereOptions eogroup;
@@ -61,7 +66,15 @@ public class CmdBagManagerWriter implements Callable<Integer> {
         } else {
             bm.setBagdir(srcdir);
         }
-        
+
+        if (metadataFile != null) {
+            bm.setMetadataFile(metadataFile);
+        }
+
+        if (metadataFields != null && ! metadataFields.isEmpty()) {
+            bm.setMetadataFields(metadataFields);
+        }
+
         bm.setAlgorithm(algorithm);
         return bm;
     }
