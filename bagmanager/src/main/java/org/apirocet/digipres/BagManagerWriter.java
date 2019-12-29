@@ -6,6 +6,7 @@ import gov.loc.repository.bagit.domain.Metadata;
 import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
 import gov.loc.repository.bagit.reader.BagReader;
 import gov.loc.repository.bagit.verify.BagVerifier;
+import org.apirocet.digipres.model.BagManager;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -21,30 +22,30 @@ public class BagManagerWriter {
 
     private static final Logger LOGGER = getLogger(BagManagerWriter.class);
 
+    private BagManager bm;
+    private static final boolean includeHiddenFiles = false;
+
     private File bagdir;
-    private File outbagdir;
+    private File srcdir;
     private Bag bag;
-    private boolean includeHiddenFiles = false;
     private boolean replace = false;
     private StandardSupportedAlgorithms algorithm;
+    private File metadataFile;
 
-    public BagManagerWriter(File bagdir, StandardSupportedAlgorithms algorithm) {
-        this.bagdir = bagdir;
-        this.algorithm = algorithm;
-    }
-
-    public BagManagerWriter(File bagdir, File outbagdir, StandardSupportedAlgorithms algorithm, boolean replace) {
-        this.bagdir = bagdir;
-        this.outbagdir = outbagdir;
-        this.algorithm = algorithm;
-        this.replace = replace;
+    public BagManagerWriter(BagManager bm) {
+        this.bm = bm;
+        this.bagdir = bm.getBagdir();
+        this.srcdir = bm.getSrcdir();
+        this.algorithm = bm.getAlgorithm();
+        this.replace = bm.isReplace();
+        this.metadataFile = bm.getMetadataFile();
     }
 
     public Integer write() {
-        if (outbagdir == null) {
+        if (srcdir == null) {
             return writeInPlace(Paths.get(bagdir.getAbsolutePath())) && verify(bagdir) ? 0 : 1;
         } else {
-            return writeElsewhere(Paths.get(bagdir.getAbsolutePath()), Paths.get(outbagdir.getAbsolutePath())) && verify(outbagdir) ? 0 : 1;
+            return writeElsewhere(Paths.get(srcdir.getAbsolutePath()), Paths.get(bagdir.getAbsolutePath())) && verify(bagdir) ? 0 : 1;
         }
     }
 
@@ -63,7 +64,12 @@ public class BagManagerWriter {
 
         try {
             MetadataManager mdm = new MetadataManager();
-            Metadata md = mdm.setMetadata(folder.toFile());
+            Metadata md;
+            if (metadataFile != null) {
+                md = mdm.setMetadata(folder.toFile(), metadataFile);
+            } else {
+                md = mdm.setMetadata(folder.toFile());
+            }
             bag = BagCreator.bagInPlace(folder, Collections.singletonList(algorithm), includeHiddenFiles, md);
         } catch (NoSuchAlgorithmException ex) {
             LOGGER.error("Cannot create bag with checksum algorithm {}: {}", algorithm.getMessageDigestName(), ex.getMessage());

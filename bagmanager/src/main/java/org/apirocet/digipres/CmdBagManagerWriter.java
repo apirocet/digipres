@@ -1,6 +1,7 @@
 package org.apirocet.digipres;
 
 import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
+import org.apirocet.digipres.model.BagManager;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -15,7 +16,7 @@ public class CmdBagManagerWriter implements Callable<Integer> {
     private BagManagerApp bm;
 
     @CommandLine.Parameters(paramLabel = "<source directory>", description = "the path to the source directory")
-    File bagdir;
+    File srcdir;
 
     @CommandLine.Option(names = {"-a", "--algorithm"},
             defaultValue = "MD5",
@@ -32,7 +33,7 @@ public class CmdBagManagerWriter implements Callable<Integer> {
         @CommandLine.Option(names = {"-o", "--outdir"},
                 required = true,
                 description = "the path to the output directory where the bag will be created.  Optional:  if not specified, the bag will be created in-place at the source directory")
-        File outbagdir;
+        File outdir;
 
         @CommandLine.Option(names = {"-r", "--replace"},
                 required = false,
@@ -45,15 +46,23 @@ public class CmdBagManagerWriter implements Callable<Integer> {
         if (bm.logfile != null) {
             System.setProperty("logfile", bm.logfile);
         }
-
-        BagManagerWriter bw = null;
+        
+        BagManagerWriter bw = new BagManagerWriter(createBagManagerDTO());
+        return bw.write();
+    }
+    
+    private BagManager createBagManagerDTO() {
+        BagManager bm = new BagManager();
 
         if (eogroup != null) {
-            bw = new BagManagerWriter(bagdir, eogroup.outbagdir, algorithm, eogroup.replace);
+            bm.setBagdir(eogroup.outdir);
+            bm.setSrcdir(srcdir);
+            bm.setReplace(eogroup.replace);
         } else {
-            bw = new BagManagerWriter(bagdir, algorithm);
+            bm.setBagdir(srcdir);
         }
-
-        return bw.write();
+        
+        bm.setAlgorithm(algorithm);
+        return bm;
     }
 }
