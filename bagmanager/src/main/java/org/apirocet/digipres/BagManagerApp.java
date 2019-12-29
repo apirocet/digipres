@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
         description = "Command line BagIt bag manager",
         synopsisSubcommandLabel = "( write | verify )",
         subcommands = { CmdBagManagerWriter.class, CmdBagManagerVerifier.class })
-public class BagManager implements Callable<Integer> {
+public class BagManagerApp implements Callable<Integer> {
 
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
@@ -28,7 +28,7 @@ public class BagManager implements Callable<Integer> {
     String logfile;
 
     public static void main( String... args ) {
-        int exitCode = new CommandLine(new BagManager()).execute(args);
+        int exitCode = new CommandLine(new BagManagerApp()).execute(args);
         System.exit(exitCode);
     }
 

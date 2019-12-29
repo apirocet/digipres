@@ -9,7 +9,7 @@ import java.util.concurrent.Callable;
 public class CmdBagManagerVerifier implements Callable<Integer> {
 
     @CommandLine.ParentCommand
-    private BagManager bm;
+    private BagManagerApp bm;
 
     @CommandLine.Parameters(paramLabel = "<bag directory>", description = "the path to the bag directory")
     File bagdir;

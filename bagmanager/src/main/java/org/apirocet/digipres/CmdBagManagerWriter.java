@@ -12,7 +12,7 @@ import java.util.concurrent.Callable;
 public class CmdBagManagerWriter implements Callable<Integer> {
 
     @CommandLine.ParentCommand
-    private BagManager bm;
+    private BagManagerApp bm;
 
     @CommandLine.Parameters(paramLabel = "<source directory>", description = "the path to the source directory")
     File bagdir;
