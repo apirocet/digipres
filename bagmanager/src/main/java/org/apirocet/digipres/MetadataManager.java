@@ -1,6 +1,5 @@
 package org.apirocet.digipres;
 
-import gov.loc.repository.bagit.domain.Bag;
 import gov.loc.repository.bagit.domain.Metadata;
 import gov.loc.repository.bagit.util.PathUtils;
 import org.apirocet.digipres.model.BagManager;
@@ -10,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Properties;
@@ -46,8 +44,7 @@ public class MetadataManager {
     private void setFileMetadata(File metadataFile) throws IOException {
         LOGGER.info("Setting metadata from file '{}'", metadataFile);
         Properties metadataProperties = new Properties();
-        try (final FileChannel channel = FileChannel.open(metadataFile.toPath(), StandardOpenOption.READ);
-             final FileLock lock = channel.lock(0L, Long.MAX_VALUE, true)) {
+        try (final FileChannel channel = FileChannel.open(metadataFile.toPath(), StandardOpenOption.READ)) {
             metadataProperties.load(Channels.newInputStream(channel));
         }
         metadataProperties.forEach((key, value) -> metadata.add((String) key, (String) value));
@@ -55,7 +52,7 @@ public class MetadataManager {
 
     private void setProvidedMetadata(Map<String, String> metadataFields) {
         LOGGER.info("Setting metadata from provided command line values");
-        metadataFields.forEach((key, value) -> metadata.add((String) key, (String) value));
+        metadataFields.forEach((key, value) -> metadata.add(key, value));
     }
 
     private void setDefaultMetadata() throws IOException {

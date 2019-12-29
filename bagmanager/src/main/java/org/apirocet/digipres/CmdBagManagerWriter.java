@@ -5,8 +5,6 @@ import org.apirocet.digipres.model.BagManager;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -14,7 +12,7 @@ import java.util.concurrent.Callable;
 public class CmdBagManagerWriter implements Callable<Integer> {
 
     @CommandLine.ParentCommand
-    private BagManagerApp bm;
+    BagManagerApp bm;
 
     @CommandLine.Parameters(paramLabel = "<source directory>", description = "the path to the source directory")
     File srcdir;
@@ -41,13 +39,12 @@ public class CmdBagManagerWriter implements Callable<Integer> {
         File outdir;
 
         @CommandLine.Option(names = {"-r", "--replace"},
-                required = false,
                 description = "replace the bag contents in the output bag directory")
         boolean replace;
     }
 
     @Override
-    public Integer call() throws IOException, NoSuchAlgorithmException {
+    public Integer call() {
         if (bm.logfile != null) {
             System.setProperty("logfile", bm.logfile);
         }

@@ -1,6 +1,5 @@
 package org.apirocet.digipres.model;
 
-import gov.loc.repository.bagit.hash.Hasher;
 import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
 
 import java.io.File;

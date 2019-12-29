@@ -23,13 +23,11 @@ public class BagManagerWriter {
     private static final Logger LOGGER = getLogger(BagManagerWriter.class);
 
     private BagManager bm;
-    private Metadata md;
     private static final boolean includeHiddenFiles = false;
 
     private File bagdir;
     private File srcdir;
-    private Bag bag;
-    private boolean replace = false;
+    private boolean replace;
     private StandardSupportedAlgorithms algorithm;
     private File metadataFile;
 
@@ -108,8 +106,8 @@ public class BagManagerWriter {
 
         try {
             MetadataManager mdm = new MetadataManager();
-            md = mdm.setMetadata(bm);
-            bag = BagCreator.bagInPlace(folder, Collections.singletonList(algorithm), includeHiddenFiles, md);
+            Metadata md = mdm.setMetadata(bm);
+            Bag bag = BagCreator.bagInPlace(folder, Collections.singletonList(algorithm), includeHiddenFiles, md);
         } catch (NoSuchAlgorithmException ex) {
             LOGGER.error("Cannot create bag with checksum algorithm {}: {}", algorithm.getMessageDigestName(), ex.getMessage());
             return false;
@@ -185,13 +183,14 @@ public class BagManagerWriter {
                 destfolder.mkdir();
             }
 
-            String files[] = srcfolder.list();
-            for (String file : files)
-            {
-                File srcFile = new File(srcfolder, file);
-                File destFile = new File(destfolder, file);
+            String[] files = srcfolder.list();
+            if (files != null && files.length != 0) {
+                for (String file : files) {
+                    File srcFile = new File(srcfolder, file);
+                    File destFile = new File(destfolder, file);
 
-                copyFolder(srcFile, destFile);
+                    copyFolder(srcFile, destFile);
+                }
             }
         }
         else

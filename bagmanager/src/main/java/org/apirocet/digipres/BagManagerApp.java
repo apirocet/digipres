@@ -33,7 +33,7 @@ public class BagManagerApp implements Callable<Integer> {
     }
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         // if the command was invoked without subcommand, show the usage help
         spec.commandLine().usage(System.err);
         return 1;
