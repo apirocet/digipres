@@ -2,6 +2,7 @@ package org.apirocet.digipres;
 
 import gov.loc.repository.bagit.creator.BagCreator;
 import gov.loc.repository.bagit.domain.Bag;
+import gov.loc.repository.bagit.domain.Metadata;
 import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
 import gov.loc.repository.bagit.reader.BagReader;
 import gov.loc.repository.bagit.verify.BagVerifier;
@@ -61,7 +62,9 @@ public class BagManagerWriter {
         LOGGER.info("Creating bag in place from contents at '{}' with {} checksums", folder.toAbsolutePath(), algorithm.getMessageDigestName());
 
         try {
-            bag = BagCreator.bagInPlace(folder, Collections.singletonList(algorithm), includeHiddenFiles);
+            MetadataManager mdm = new MetadataManager();
+            Metadata md = mdm.setMetadata(folder.toFile());
+            bag = BagCreator.bagInPlace(folder, Collections.singletonList(algorithm), includeHiddenFiles, md);
         } catch (NoSuchAlgorithmException ex) {
             LOGGER.error("Cannot create bag with checksum algorithm {}: {}", algorithm.getMessageDigestName(), ex.getMessage());
             return false;

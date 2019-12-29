@@ -22,6 +22,10 @@ public class CmdBagManagerWriter implements Callable<Integer> {
             description = "checksum algorithm to use. Supported algorithms are MD5, SHA1, SHA224, SHA256, and SHA512.  Default is MD5.")
     StandardSupportedAlgorithms algorithm;
 
+    @CommandLine.Option(names = {"-m", "--metadata-file"},
+            description = "path to supplementary bag-info.txt metadata file.")
+    File metadataFile;
+
     @CommandLine.ArgGroup(exclusive = false)
     ElsewhereOptions eogroup;
     static class ElsewhereOptions {
