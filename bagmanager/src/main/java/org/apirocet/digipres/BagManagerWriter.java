@@ -23,6 +23,7 @@ public class BagManagerWriter {
     private static final Logger LOGGER = getLogger(BagManagerWriter.class);
 
     private BagManager bm;
+    private Metadata md;
     private static final boolean includeHiddenFiles = false;
 
     private File bagdir;
@@ -42,6 +43,15 @@ public class BagManagerWriter {
     }
 
     public Integer write() {
+
+        if (! checkFiles())
+            return 1;
+
+        if (! Files.isReadable(metadataFile.toPath())) {
+            LOGGER.error("Metadata file '{}' is not readable", metadataFile);
+            return 1;
+        }
+
         if (srcdir == null) {
             return writeInPlace(Paths.get(bagdir.getAbsolutePath())) && verify(bagdir) ? 0 : 1;
         } else {
@@ -49,22 +59,56 @@ public class BagManagerWriter {
         }
     }
 
+    private boolean checkFiles() {
+        Path folder = bagdir.toPath();
+
+        if (srcdir == null) {
+            if (! Files.isWritable(folder)) {
+                LOGGER.error("Cannot create in-place bag at '{}': directory does not exist or is not writable", folder);
+                return false;
+            }
+
+            if (isBag(folder)) {
+                LOGGER.error("Cannot create in-place bag at '{}': bag already exists at this location", folder);
+                return false;
+            }
+        } else {
+            Path srcFolder = srcdir.toPath();
+
+            if (! Files.isReadable(srcFolder)) {
+                LOGGER.error("Cannot create bag from contents at '{}': directory does not exist or is not readable", srcFolder);
+                return false;
+            }
+
+            Path absSrc = srcFolder.toAbsolutePath().normalize();
+            Path absDest = folder.toAbsolutePath().normalize();
+            if (absSrc.toString().equals(absDest.toString())) {
+                LOGGER.error("Cannot create bag: source and destination are the same");
+                return false;
+            }
+
+            if (Files.exists(folder)) {
+                if (isBag(folder)) {
+                    if (!replace) {
+                        LOGGER.error("Cannot create bag at '{}': bag already exists at this location.  Please use the '--replace' flag to replace the contents of this bag", folder);
+                        return false;
+                    }
+                } else {
+                    LOGGER.error("Cannot create bag at '{}': directory exists", folder);
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     private boolean writeInPlace(Path folder) {
-        if (Files.notExists(folder)) {
-            LOGGER.error("Cannot create in-place bag at '{}': directory does not exist", folder);
-            return false;
-        }
-
-        if (isBag(folder)) {
-            LOGGER.error("Cannot create in-place bag at '{}': bag already exists at this location", folder);
-            return false;
-        }
-
         LOGGER.info("Creating bag in place from contents at '{}' with {} checksums", folder.toAbsolutePath(), algorithm.getMessageDigestName());
 
         try {
             MetadataManager mdm = new MetadataManager();
-            Metadata md = mdm.setMetadata(bm);
+            md = mdm.setMetadata(bm);
             bag = BagCreator.bagInPlace(folder, Collections.singletonList(algorithm), includeHiddenFiles, md);
         } catch (NoSuchAlgorithmException ex) {
             LOGGER.error("Cannot create bag with checksum algorithm {}: {}", algorithm.getMessageDigestName(), ex.getMessage());
@@ -80,37 +124,20 @@ public class BagManagerWriter {
     }
 
     private boolean writeElsewhere(Path srcfolder, Path outfolder) {
-        boolean removeExistingBag = false;
 
-        Path absSrc = srcfolder.toAbsolutePath().normalize();
-        Path absDest = outfolder.toAbsolutePath().normalize();
-        if (absSrc.toString().equals(absDest.toString())) {
-            LOGGER.error("Cannot create bag:  source and destination are the same", outfolder);
-            return false;
-        }
+        if (replace && Files.exists(outfolder)) {
+            if (Files.isWritable(outfolder)) {
+                LOGGER.info("Removing existing bag at '{}'", outfolder);
+                Path delPath = outfolder.resolve(outfolder);
 
-        if (Files.exists(outfolder)) {
-            if (isBag(outfolder)) {
-                if (!replace) {
-                    LOGGER.error("Cannot create bag at '{}': bag already exists at this location.  Please use the '--replace' flag to replace the contents of this bag", outfolder);
+                try {
+                    Files.walk(delPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+                } catch (IOException ex) {
+                    LOGGER.error("Cannot clean bag destination", ex);
                     return false;
-                } else {
-                    removeExistingBag = true;
                 }
             } else {
-                LOGGER.error("Cannot create bag at '{}': directory exists", outfolder);
-                return false;
-            }
-        }
-
-        if (removeExistingBag) {
-            LOGGER.info("Removing existing bag at '{}'", outfolder);
-            Path delPath = outfolder.resolve(outfolder);
-
-            try {
-                Files.walk(delPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-            } catch (IOException ex) {
-                LOGGER.error("Cannot clean bag destination", ex);
+                LOGGER.error("Cannot clean bag destination:  directory is not writable");
                 return false;
             }
         }
