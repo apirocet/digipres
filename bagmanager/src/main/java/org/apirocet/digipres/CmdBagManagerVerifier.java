@@ -1,5 +1,6 @@
 package org.apirocet.digipres;
 
+import org.apirocet.digipres.model.BagManager;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -9,18 +10,32 @@ import java.util.concurrent.Callable;
 public class CmdBagManagerVerifier implements Callable<Integer> {
 
     @CommandLine.ParentCommand
-    private BagManagerApp bm;
+    private BagManagerApp bma;
 
     @CommandLine.Parameters(paramLabel = "<bag directory>", description = "the path to the bag directory")
     File bagdir;
 
+    @CommandLine.Option(names = {"-p", "--profile"},
+            description = "path to optional BagIt profile file (to verify profile conformance)")
+    File profileFile;
+
     @Override
     public Integer call () {
-        if (bm.logfile != null) {
-            System.setProperty("logfile", bm.logfile);
+        if (bma.logfile != null) {
+            System.setProperty("logfile", bma.logfile);
+        }
+        BagManagerVerifier bmv = new BagManagerVerifier(createBagManagerDTO());
+        return bmv.verify() ? 0 : 1;
+    }
+
+    private BagManager createBagManagerDTO() {
+        BagManager bm = new BagManager();
+        bm.setBagdir(bagdir);
+
+        if (profileFile != null) {
+            bm.setProfileFile(profileFile);
         }
 
-        System.out.println("Verifying bag " + bagdir);
-        return 0;
+        return bm;
     }
 }

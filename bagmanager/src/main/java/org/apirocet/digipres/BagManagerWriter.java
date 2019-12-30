@@ -50,10 +50,11 @@ public class BagManagerWriter {
             return 1;
         }
 
+        BagManagerVerifier bmv = new BagManagerVerifier(bm);
         if (srcdir == null) {
-            return writeInPlace(Paths.get(bagdir.getAbsolutePath())) && verify(bagdir) ? 0 : 1;
+            return writeInPlace(Paths.get(bagdir.getAbsolutePath())) && bmv.verify() ? 0 : 1;
         } else {
-            return writeElsewhere(Paths.get(srcdir.getAbsolutePath()), Paths.get(bagdir.getAbsolutePath())) && verify(bagdir) ? 0 : 1;
+            return writeElsewhere(Paths.get(srcdir.getAbsolutePath()), Paths.get(bagdir.getAbsolutePath())) && bmv.verify() ? 0 : 1;
         }
     }
 
@@ -148,24 +149,6 @@ public class BagManagerWriter {
         }
 
         return writeInPlace(outfolder);
-    }
-
-    private boolean verify(File bagdir) {
-        BagVerifier bv = new BagVerifier();
-        BagReader reader = new BagReader();
-        LOGGER.info("Verifying valid bag from contents at '{}'", bagdir.getAbsolutePath());
-        try {
-            Bag bag = reader.read(bagdir.toPath());
-            bv.isValid(bag, includeHiddenFiles);
-        } catch (NoSuchFileException ex) {
-            LOGGER.error("'{}' does not appear to be a bag:  missing bagit.txt file", bagdir);
-            return false;
-        } catch (Exception ex) {
-            LOGGER.error("Bag is not valid", ex);
-            return false;
-        }
-
-        return true;
     }
 
     private boolean isBag(Path folder) {

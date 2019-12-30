@@ -12,7 +12,7 @@ import java.util.concurrent.Callable;
 public class CmdBagManagerWriter implements Callable<Integer> {
 
     @CommandLine.ParentCommand
-    BagManagerApp bm;
+    BagManagerApp bma;
 
     @CommandLine.Parameters(paramLabel = "<source directory>", description = "the path to the source directory")
     File srcdir;
@@ -45,8 +45,8 @@ public class CmdBagManagerWriter implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        if (bm.logfile != null) {
-            System.setProperty("logfile", bm.logfile);
+        if (bma.logfile != null) {
+            System.setProperty("logfile", bma.logfile);
         }
         
         BagManagerWriter bw = new BagManagerWriter(createBagManagerDTO());
