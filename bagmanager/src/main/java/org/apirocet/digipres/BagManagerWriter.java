@@ -4,14 +4,15 @@ import gov.loc.repository.bagit.creator.BagCreator;
 import gov.loc.repository.bagit.domain.Bag;
 import gov.loc.repository.bagit.domain.Metadata;
 import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
-import gov.loc.repository.bagit.reader.BagReader;
-import gov.loc.repository.bagit.verify.BagVerifier;
 import org.apirocet.digipres.model.BagManager;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,7 +46,7 @@ public class BagManagerWriter {
         if (! checkFiles())
             return 1;
 
-        if (! Files.isReadable(metadataFile.toPath())) {
+        if (metadataFile != null && ! Files.isReadable(metadataFile.toPath())) {
             LOGGER.error("Metadata file '{}' is not readable", metadataFile);
             return 1;
         }
