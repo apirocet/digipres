@@ -3,6 +3,7 @@ package org.apirocet.digipres;
 import gov.loc.repository.bagit.domain.Metadata;
 import gov.loc.repository.bagit.util.PathUtils;
 import org.apirocet.digipres.model.BagManager;
+import org.apirocet.digipres.util.OrderedProperties;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -11,7 +12,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
-import java.util.Properties;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -43,11 +43,14 @@ public class MetadataManager {
 
     private void setFileMetadata(File metadataFile) throws IOException {
         LOGGER.info("Setting metadata from file '{}'", metadataFile);
-        Properties metadataProperties = new Properties();
+        OrderedProperties metadataProperties = new OrderedProperties();
         try (final FileChannel channel = FileChannel.open(metadataFile.toPath(), StandardOpenOption.READ)) {
             metadataProperties.load(Channels.newInputStream(channel));
         }
-        metadataProperties.forEach((key, value) -> metadata.add((String) key, (String) value));
+
+        for (Object key: metadataProperties.orderedKeys()) {
+            metadata.add((String) key, metadataProperties.getProperty((String) key));
+        }
     }
 
     private void setProvidedMetadata(Map<String, String> metadataFields) {
