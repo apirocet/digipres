@@ -15,9 +15,9 @@ public class CmdBagManagerVerifier implements Callable<Integer> {
     @CommandLine.Parameters(paramLabel = "<bag directory>", description = "the path to the bag directory")
     File bagdir;
 
-    @CommandLine.Option(names = {"-p", "--profile"},
-            description = "path to optional BagIt profile file (to verify profile conformance)")
-    File profileFile;
+    @CommandLine.Option(names = {"--with-profile"},
+            description = "verify conformance to BagIt profile")
+    boolean verifyWithProfile;
 
     @Override
     public Integer call () {
@@ -32,9 +32,7 @@ public class CmdBagManagerVerifier implements Callable<Integer> {
         BagManager bm = new BagManager();
         bm.setBagdir(bagdir);
 
-        if (profileFile != null) {
-            bm.setProfileFile(profileFile);
-        }
+        bm.setVerifyWithProfile(verifyWithProfile);
 
         return bm;
     }

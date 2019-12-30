@@ -14,7 +14,7 @@ public class BagManager {
     private Map<String,String> metadataFields = new HashMap<>();
     private StandardSupportedAlgorithms algorithm = StandardSupportedAlgorithms.MD5;
     private boolean replace = false;
-    private File profileFile;
+    private boolean verifyWithProfile;
 
 
     public File getBagdir() {
@@ -65,11 +65,7 @@ public class BagManager {
         this.replace = replace;
     }
 
-    public File getProfileFile() {
-        return profileFile;
-    }
+    public boolean isVerifiedWithProfile() { return verifyWithProfile; }
 
-    public void setProfileFile(File profileFile) {
-        this.profileFile = profileFile;
-    }
+    public void setVerifyWithProfile(boolean verifyWithProfile) { this.verifyWithProfile = verifyWithProfile; }
 }
