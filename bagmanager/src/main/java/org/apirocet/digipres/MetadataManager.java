@@ -1,7 +1,6 @@
 package org.apirocet.digipres;
 
-import gov.loc.repository.bagit.domain.Metadata;
-import gov.loc.repository.bagit.util.PathUtils;
+import com.github.jscancella.hash.PayloadOxumGenerator;
 import org.apirocet.digipres.model.BagManager;
 import org.apirocet.digipres.util.OrderedProperties;
 import org.slf4j.Logger;
@@ -11,6 +10,7 @@ import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -20,12 +20,12 @@ public class MetadataManager {
     private static final Logger LOGGER = getLogger(MetadataManager.class);
 
 
-    private Metadata metadata = new Metadata();
+    private Map<String, String> metadata = new LinkedHashMap<>();
     private File bagdir;
 
     public MetadataManager() { }
 
-    public Metadata setMetadata(BagManager bm) throws IOException {
+    public Map<String, String> setMetadata(BagManager bm) throws IOException {
         bagdir = bm.getBagdir();
 
         if (bm.getMetadataFile() != null) {
@@ -49,22 +49,22 @@ public class MetadataManager {
         }
 
         for (Object key: metadataProperties.orderedKeys()) {
-            metadata.add((String) key, metadataProperties.getProperty((String) key));
+            metadata.put((String) key, metadataProperties.getProperty((String) key));
         }
     }
 
     private void setProvidedMetadata(Map<String, String> metadataFields) {
         LOGGER.info("Setting metadata from provided command line values");
-        metadataFields.forEach((key, value) -> metadata.add(key, value));
+        metadataFields.forEach((key, value) -> metadata.put(key, value));
     }
 
     private void setDefaultMetadata() throws IOException {
         String size = getBagSize(bagdir);
-        metadata.add("Bag-Size", size);
+        metadata.put("Bag-Size", size);
     }
 
     private String getBagSize(File bagdir) throws IOException {
-        String size = PathUtils.generatePayloadOxum(bagdir.toPath());
+        String size = PayloadOxumGenerator.generatePayloadOxum(bagdir.toPath());
         String bytes = size.split("\\.")[0];
         return bytesToHumans(bytes);
     }

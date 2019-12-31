@@ -1,6 +1,6 @@
 package org.apirocet.digipres;
 
-import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
+import com.github.jscancella.hash.StandardHasher;
 import org.apirocet.digipres.model.BagManager;
 import picocli.CommandLine;
 
@@ -20,7 +20,7 @@ public class CmdBagManagerWriter implements Callable<Integer> {
     @CommandLine.Option(names = {"-a", "--algorithm"},
             defaultValue = "MD5",
             description = "checksum algorithm to use. Supported algorithms are MD5, SHA1, SHA224, SHA256, and SHA512.  Default is MD5.")
-    StandardSupportedAlgorithms algorithm;
+    StandardHasher algorithm;
 
     @CommandLine.Option(names = {"-m", "--metadata-file"},
             description = "path to optional supplementary bag-info.txt metadata file.")

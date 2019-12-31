@@ -1,10 +1,8 @@
 package org.apirocet.digipres;
 
-import gov.loc.repository.bagit.conformance.BagProfileChecker;
-import gov.loc.repository.bagit.domain.Bag;
-import gov.loc.repository.bagit.exceptions.InvalidBagMetadataException;
-import gov.loc.repository.bagit.reader.BagReader;
-import gov.loc.repository.bagit.verify.BagVerifier;
+import com.github.jscancella.conformance.BagLinter;
+import com.github.jscancella.domain.Bag;
+import com.github.jscancella.exceptions.InvalidBagMetadataException;
 import org.apirocet.digipres.model.BagManager;
 import org.slf4j.Logger;
 
@@ -33,8 +31,6 @@ public class BagManagerVerifier {
     }
 
     public boolean verify() {
-        BagVerifier bv = new BagVerifier();
-        BagReader reader = new BagReader();
         LOGGER.info("Verifying valid bag from contents at '{}'", bagdir);
 
         if (! Files.isReadable(bagdir.toPath())) {
@@ -43,8 +39,8 @@ public class BagManagerVerifier {
         }
         
         try {
-            Bag bag = reader.read(bagdir.toPath());
-            bv.isValid(bag, includeHiddenFiles);
+            Bag bag = Bag.read(bagdir.toPath());
+            bag.isValid(includeHiddenFiles);
 
             if (verifyWithProfile) {
                 checkWithProfile(bag);
@@ -83,10 +79,10 @@ public class BagManagerVerifier {
             throw new InvalidBagMetadataException("BagIt profile identifier is not a valid URL.  Bag is not valid.");
         }
 
-        LOGGER.info("Verifying conformance to BagIt profile", bagdir);
+        LOGGER.info("Verifying conformance to BagIt profile");
 
         InputStream profile = profileUrl.openStream();
-        BagProfileChecker.bagConformsToProfile(profile, bag);
+        BagLinter.checkAgainstProfile(profile, bag);
 
         LOGGER.info("Bag conforms to profile '{}'", profileUrlString);
     }

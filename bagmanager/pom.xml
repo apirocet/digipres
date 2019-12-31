@@ -22,9 +22,9 @@
   <dependencies>
     <!-- core dependencies -->
     <dependency>
-      <groupId>gov.loc</groupId>
-      <artifactId>bagit</artifactId>
-      <version>5.2.0</version>
+      <groupId>com.github.jscancella</groupId>
+      <artifactId>bagging</artifactId>
+      <version>unspecified</version>
     </dependency>
     <dependency>
       <groupId>info.picocli</groupId>

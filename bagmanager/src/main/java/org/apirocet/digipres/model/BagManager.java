@@ -1,6 +1,6 @@
 package org.apirocet.digipres.model;
 
-import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
+import com.github.jscancella.hash.StandardHasher;
 
 import java.io.File;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ public class BagManager {
     private File srcdir;
     private File metadataFile;
     private Map<String,String> metadataFields = new HashMap<>();
-    private StandardSupportedAlgorithms algorithm = StandardSupportedAlgorithms.MD5;
+    private StandardHasher algorithm = StandardHasher.MD5;
     private boolean replace = false;
     private boolean verifyWithProfile;
 
@@ -49,11 +49,11 @@ public class BagManager {
         this.metadataFields = metadataFields;
     }
 
-    public StandardSupportedAlgorithms getAlgorithm() {
+    public StandardHasher getAlgorithm() {
         return algorithm;
     }
 
-    public void setAlgorithm(StandardSupportedAlgorithms algorithm) {
+    public void setAlgorithm(StandardHasher algorithm) {
         this.algorithm = algorithm;
     }
 

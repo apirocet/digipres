@@ -1,9 +1,8 @@
 package org.apirocet.digipres;
 
-import gov.loc.repository.bagit.creator.BagCreator;
-import gov.loc.repository.bagit.domain.Bag;
-import gov.loc.repository.bagit.domain.Metadata;
-import gov.loc.repository.bagit.hash.StandardSupportedAlgorithms;
+import com.github.jscancella.domain.BagBuilder;
+import com.github.jscancella.domain.Version;
+import com.github.jscancella.hash.StandardHasher;
 import org.apirocet.digipres.model.BagManager;
 import org.slf4j.Logger;
 
@@ -13,9 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -24,12 +22,11 @@ public class BagManagerWriter {
     private static final Logger LOGGER = getLogger(BagManagerWriter.class);
 
     private BagManager bm;
-    private static final boolean includeHiddenFiles = false;
 
     private File bagdir;
     private File srcdir;
     private boolean replace;
-    private StandardSupportedAlgorithms algorithm;
+    private StandardHasher algorithm;
     private File metadataFile;
 
     public BagManagerWriter(BagManager bm) {
@@ -104,15 +101,17 @@ public class BagManagerWriter {
     }
 
     private boolean writeInPlace(Path folder) {
-        LOGGER.info("Creating bag in place from contents at '{}' with {} checksums", folder.toAbsolutePath(), algorithm.getMessageDigestName());
+        LOGGER.info("Creating bag in place from contents at '{}' with {} checksums", folder.toAbsolutePath(), algorithm.getBagitAlgorithmName());
 
         try {
             MetadataManager mdm = new MetadataManager();
-            Metadata md = mdm.setMetadata(bm);
-            Bag bag = BagCreator.bagInPlace(folder, Collections.singletonList(algorithm), includeHiddenFiles, md);
-        } catch (NoSuchAlgorithmException ex) {
-            LOGGER.error("Cannot create bag with checksum algorithm {}: {}", algorithm.getMessageDigestName(), ex.getMessage());
-            return false;
+            Map<String,String> md = mdm.setMetadata(bm);
+            BagBuilder bb = new BagBuilder();
+            bb.version(Version.VERSION_1_0());
+            bb.addAlgorithm(algorithm.getBagitAlgorithmName());
+            md.forEach(bb::addMetadata);
+            bb.bagLocation(folder);
+            bb.write();
         } catch (IOException ex) {
             LOGGER.error("Cannot create in-place bag:", ex);
             return false;
