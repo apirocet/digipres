@@ -142,6 +142,7 @@ public class BagManagerWriter {
             }
         }
 
+        LOGGER.info("Copying source contents to '{}'", outfolder);
         try {
             copyFolder(srcfolder.toFile(), outfolder.toFile());
         } catch (IOException ex) {
