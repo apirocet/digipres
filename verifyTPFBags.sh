@@ -43,8 +43,8 @@ mismatched=0
 
 usage () {
     echo "Usage:  $0 <archive root directory>" 1>&2
-    echo "   archive root directory:  base of the archive directory tree," 1>&2
-    echo "                            where bag will be written" 1>&2
+    echo "   archive root directory:  base of the archive directory tree" 1>&2
+    echo "                            where the bags are stored" 1>&2
     exit 1
 }
 
@@ -115,7 +115,16 @@ then
 fi
 
 # Verify the bags
-java -jar "${bagmgr}" verify --with-profile "${bagpath}"
+echo "Verifying bags in the archive..."
+while read bagpath
+do
+    if ! java -jar "${bagmgr}" verify --with-profile "${archrootdir}/${bagpath}"
+    then
+        mismatched=1
+    fi
+done < <(cat "${fstmp}")
 
-rm -f "${fstmp}" "${invtmp}"
-exit $?
+
+rm -f "${fstmp}" "${invtmp}" "${tmpdir}/${invfile}"
+
+exit $mismatched
