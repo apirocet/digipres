@@ -15,7 +15,7 @@ public class CmdInventoryManagerReader implements Callable<Integer> {
     @CommandLine.Parameters(paramLabel = "<inventory spreadsheet file>", description = "the path to the inventory spreadsheet")
     File inventoryFile;
 
-    @CommandLine.Option(names = "--column", split = ",",
+    @CommandLine.Option(names = "--columns", split = ",", paramLabel = "column",
             description ="column(s) to extract and display, separated by a comma." )
     List<String> columns;
 
