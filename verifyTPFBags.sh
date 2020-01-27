@@ -22,14 +22,20 @@ tmpdir="/var/tmp/bagverify"
 # Inventory file
 invfile="poetry_podcast_inventory.xlsx"
 
-# LibreOffice command
-lo="/opt/libreoffice6.3/program/soffice --headless --convert-to csv --outdir ${tmpdir} ${tmpdir}/${invfile}"
-
 # Archive directory depth
 depth=3
 
+# Inventory Manager jar path
+invmgr="inventory-manager.jar"
+
 # Bagmanager jar path
 bagmgr="bagmanager.jar"
+
+# PID
+mypid="$$"
+
+# Mismatch flag
+mismatched=0
 
 #-----------------------------------------------------------------------#
 # Functions                                                             #
@@ -62,25 +68,54 @@ then
 fi
 
 mkdir -p "${tmpdir}"
+fstmp="${tmpdir}/bags-fs.txt.${mypid}"
+invtmp="${tmpdir}/bags-inv.txt.${mypid}"
 
+echo "Checking that the inventory matches the archive contents..."
 # Get the directories in the archive
-(cd "${archrootdir}" && find . -maxdepth ${depth} -mindepth ${depth} -type d | sed 's/\.\///') | sort > "${tmpdir}/bags-fs.txt"
+(cd "${archrootdir}" && find . -maxdepth ${depth} -mindepth ${depth} -type d | sed 's/\.\///') | sort > "${fstmp}"
 
-# Copy the inventory sheet to the tmpdir and convert it to csv
-if ! cp "${archrootdir}/${invfile}" "${tmpdir}/${infile}"
+# Copy the inventory sheet to the tmpdir
+if ! cp "${archrootdir}/${invfile}" "${tmpdir}/${invfile}"
 then
     echo "Cannot copy inventory file '${archrootdir}/${invfile}' to '${tmpdir}'.  Exiting." 1>&2
     exit 1
 fi
 
-if ! $lo
+# Get the list of paths in the inventory
+if ! java -jar "${invmgr}" read --columns=Path "${tmpdir}/${invfile}" > "${invtmp}"
 then
-    echo "Cannot convert inventory file '${tmpdir}/${invfile}' to CSV format.  Exiting." 1>&2
+    echo "Cannot read inventory file '${invtmp}'.  Exiting." 1>&2
     exit 1
 fi
 
-# Verify that inventory and directories match
+sed -i 's/^Path: \///' "${invtmp}"
+sort -o "${invtmp}"  "${invtmp}"
+
+# Get bags only in filesystems
+fsonly=`comm -23 "${fstmp}" "${invtmp}"`
+if [ "X${fsonly}" != "X" ]
+then
+    echo "WARNING:  Bags found in the archive that are not in the inventory:"
+    echo "${fsonly}"
+    mismatched=1
+fi
+
+invonly=`comm -13 "${fstmp}" "${invtmp}"`
+if [ "X${invonly}" != "X" ]
+then
+    echo "WARNING:  Bags found in the inventory that are not in the archive:"
+    echo "${invonly}"
+    mismatched=1
+fi
+
+if [ ${mismatched} -eq 0 ]
+then
+    echo "Inventory and archive are in sync."
+fi
 
 # Verify the bags
-#java -jar "${bagmgr}" verify --with-profile "${bagpath}"
+java -jar "${bagmgr}" verify --with-profile "${bagpath}"
+
+rm -f "${fstmp}" "${invtmp}"
 exit $?
