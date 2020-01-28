@@ -28,6 +28,9 @@ RCLONE='/bin/rclone'
 # Source archive root
 ARCHDIR='/archive'
 
+# Podcast inventory
+INVENTORY="${ARCHDIR}/poetry_podcast_inventory.xlsx"
+
 # Remotes
 declare -a remotes=('tpf-b2:pf-audio-archive')
 
@@ -63,8 +66,21 @@ fi
 status=0
 for rmt in "${remotes[@]}"
 do
+    # Copy directories
     $RCLONE -v copy "${srcdir}" "${rmt}/${copydir}"
-    status=$?
+    tstatus=$?
+    if [ $tstatus -gt 0 ]
+    then
+        status=1
+    fi
+
+    # Copy inventory file
+    $RCLONE -v copy "${INVENTORY}" "${rmt}/"
+    tstatus=$?
+    if [ $tstatus -gt 0 ]
+    then
+        status=1
+    fi
 done
 
 exit $status
