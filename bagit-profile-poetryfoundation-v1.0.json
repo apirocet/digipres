@@ -1,0 +1,83 @@
+{
+  "BagIt-Profile-Info":{
+    "BagIt-Profile-Identifier":"https://assets.poetryfoundation.org/uploads/documents/bagit-profile-poetryfoundation-v1.0.json",
+    "Source-Organization":"Poetry Foundation",
+    "Contact-Name":"Harlan Wallach",
+    "Contact-Phone":"+1 (312) 799-8046",
+    "Contact-Email":"hwallach@poetryfoundation.org",
+    "External-Description":"BagIt Profile for packaging audio podcasts",
+    "Version":"1.0",
+    "BagIt-Profile-Version":"1.3.0"
+  },
+  "Bag-Info":{
+    "Source-Organization":{
+      "required":true,
+      "values":[
+        "Poetry Foundation"
+      ]
+    },
+    "Organization-Address":{
+      "required":true,
+      "values":[
+        "61 West Superior Street, Chicago, IL 60654"
+      ]
+    },
+    "Contact-Name":{
+      "required":true,
+      "values":[
+        "Harlan Wallach"
+      ]
+    },
+    "Contact-Phone":{
+      "required":true,
+      "values":[
+        "+1 (312) 799-8046"
+      ]
+    },
+    "Contact-Email":{
+      "required":true,
+      "values":[
+        "hwallach@poetryfoundation.org"
+      ]
+    },
+    "External-Description":{
+      "required":true,
+      "values":[
+        "Audio podcasts created by the Poetry Foundation"
+      ]
+    },
+    "External-Identifier":{
+      "required":true,
+      "repeatable":false,
+      "description":"UUID of the object"
+    },
+    "Bagging-Date":{
+      "required":true
+    },
+    "Bag-Size":{
+      "required":true
+    },
+    "Payload-Oxum":{
+      "required":true
+    }
+  },
+  "Manifests-Allowed":[
+    "md5",
+    "sha1",
+    "sha512"
+  ],
+  "Tag-Manifests-Allowed":[
+    "md5",
+    "sha1",
+    "sha512"
+  ],
+  "Allow-Fetch.txt":false,
+  "Serialization":"optional",
+  "Accept-Serialization":[
+    "application/zip",
+    "application/gzip"
+  ],
+  "Accept-BagIt-Version":[
+    "1.0"
+  ] 
+}
