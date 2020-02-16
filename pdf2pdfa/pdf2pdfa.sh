@@ -78,6 +78,13 @@ absoutfile=`readlink -f "${outfile}"`
 cd "${wkdir}"
 abspath=`pwd`
 
+# Skip if already a PDF/A
+if  ${pdfchecker} "${absinfile}" | grep "${pdfokstr}" > /dev/null
+then
+    echo "File '${infile}' is already a valid PDF/A document.  Skipping."
+    exit 0
+fi
+
 # Convert
 ${gs_exe} -dPDFA=${pdfacl} \
           -dNOOUTERSAVE \
