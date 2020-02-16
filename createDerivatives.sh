@@ -190,5 +190,5 @@ else
     echo "All derivatives are in place."
 fi
 
-#rm -rf "${tmpdir}"
+rm -rf "${tmpdir}"
 exit ${final_status}
