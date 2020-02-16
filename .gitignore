@@ -2,3 +2,5 @@
 *.iml
 target/
 *.log
+bagmanager.jar
+inventory-manager.jar
