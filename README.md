@@ -12,6 +12,23 @@ stored in remote locations, then periodically verified.
 
 BagIT Specification: https://tools.ietf.org/html/rfc8493
 
+A basic workflow consists of the following tasks:
+
+1. Put files your want to preserve into a folder with some
+   structure and accompanying metadata.
+2. Create preservation-ready derivative copies of selected files 
+   within the folder (`createDerivatives.sh`).
+3. Validate all the files within the folder, to make sure
+   the formats are correct, and the files are not corrupted
+   (`validateFiles.sh`).
+4. Create a BagIT bag folder from your prepared
+   folder of stuff (`createTPFBag.sh`) in your primary
+   archive location.
+5. Copy the Bag folder to other storage platforms for
+   redundancy and offsite safekeeping (`copyToRemotes.sh`).
+6. Periodically verify the Bag folder in your primary archive
+   location, other storage locations (`verifyTPFBags.sh`).
+
 ## Dependencies
 
 The tools are designed to run on a Unix host (inclusing Mac)
@@ -125,6 +142,23 @@ This script is a wrapper for the following conversion tools:
                         and find files to convert
 ```
 
+### `pdf2pdfa/pdf2pdfa.sh`
+
+Script to convert a PDF file to a valid PDF/A.
+
+The files alongside the script `pdf2pdfa/pdf2pdfa.sh` must be in
+the same directory as the script itself.
+
+This script is a wrapper for Ghostscript, and optionally VeraPDF:
+If verapdf is defined, the resulting PDF/A file will be validated.
+
+```
+Usage:  pdf2pdfa input-file output-file [1|2]
+           input-file:  source PDF file to convert to PDF/A
+           output-file:  PDF/A file to write out
+           1 or 2:  PDF/A conformance level.  Default is 2.
+```
+
 ### `validateFiles.sh`
 
 Script to recursively validate mp3, wav, and pdf files in a directory
@@ -163,7 +197,7 @@ Script to copy source directory to one or more remote storage locations.
 
 This script is a wrapper for Rclone.
 
-*Note*:  This script only copies new files and updates exisiting files.
+*Note*:  This script only copies new files and updates existing files.
 No files are deleted.
 
 Rclone remote locations are defined in the `Configuration` section at the 
@@ -175,3 +209,65 @@ Usage: copyToRemotes.sh [source directory]
                               root directory. If not set, the entire
                               archive will be copied.
 ```
+
+### `verifyTPFBags.sh`
+
+Script to verify BagIt bags and inventory.
+
+The verification scripts checks that inventory contents and files in 
+the archive match up;  and that all the directories and files in a bag 
+match the contents of the bag manifest;  and that none of the files have
+changes since the bag was created/updated.
+
+This script is a wrapper for the `bagmanager` and `inventory-manager` 
+Java applications.
+
+```
+Usage: verifyTPFBags.sh directory
+      directory:  base of the archive directory tree
+```
+
+### `bagmanager`
+
+Java application to create and verify bags.  See the help documentation
+for the application to run the application on its own as a Java jar.
+
+```
+$ java -jar bagmanager.jar -h
+Usage: bagmanager [-hV] [-l=<logfile>] ( write | verify )
+Command line BagIt bag manager
+  -l, --logfile=<logfile>   path to log file (default is bagmanager.log in
+                              current directory)
+  -h, --help                Show this help message and exit.
+  -V, --version             Print version information and exit.
+Commands:
+  write   write/update the bag
+  verify  verify the bag
+```
+
+### `inventory-manager`
+
+Java application to read the inventory spreadsheet.  See the help documentation
+for the application to run the application on its own as a Java jar.
+
+```
+$ java -jar inventory-manager.jar -h
+Usage: bagmanager [-hV] [-l=<logfile>] ( read )
+Command line inventory spreadsheet manager
+  -l, --logfile=<logfile>   path to log file (default is inventorymanager.log
+                              in current directory)
+  -h, --help                Show this help message and exit.
+  -V, --version             Print version information and exit.
+Commands:
+  read  read columns from the inventory spreadsheet
+```
+
+### Miscellaneous Files
+
+* `poetryfoundation-bagit.properties`:  sample BagiT template properties file,
+  used by `createTPFBag.sh`.  The location of this file can be set in the script.
+* This README
+
+## Who do I talk to?
+
+GitHub: @sprater
