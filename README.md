@@ -270,4 +270,4 @@ Commands:
 
 ## Who do I talk to?
 
-GitHub: @sprater
+GitHub: [@sprater]( https://github.com/sprater )
