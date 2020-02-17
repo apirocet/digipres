@@ -7,6 +7,11 @@ with relatively little effort in small organizations with few
 resources.  The tools are all free and open-source, and use common
 open source utilities with proven history.
 
+The core of the system are BagIT 1.0 Bags, which are created, 
+stored in remote locations, then periodically verified.
+
+BagIT Specification: https://tools.ietf.org/html/rfc8493
+
 ## Dependencies
 
 The tools are designed to run on a Unix host (inclusing Mac)
@@ -107,13 +112,66 @@ The toolkit contains the following scripts, applications, and utilities:
 ### `createDerivatives.sh`
   
 Script to create derivatives for Microsoft Word and Excel files, create 
-PDF-A versions of PDF files in a directory tree prior to archiving them.                                                       #
+PDF-A versions of PDF files in a directory tree prior to archiving them.
   
-This script is a wrapper for the following conversion tools: Microsoft Word 
-and Excel to PDF-A, csv:  LibreOffice; PDF to PDF-A: pdf2pdfa.sh
+This script is a wrapper for the following conversion tools: 
+
+* Microsoft Word and Excel to PDF-A, csv:  LibreOffice
+* PDF to PDF-A: pdf2pdfa.sh
 
 ```
   Usage:  createDerivatives.sh directory
             directory:  path to top-level directory tree to examine
                         and find files to convert
+```
+
+### `validateFiles.sh`
+
+Script to recursively validate mp3, wav, and pdf files in a directory
+tree prior to archiving them.
+
+This script is a wrapper for the following validation tools:
+
+* MP3:  Checkmate MP3 checker
+* WAV:  JHove
+* PDF:  VeraPDF
+
+```
+ Usage:  validateFiles.sh directory
+            directory:  path to top-level directory tree to check
+```
+
+###  `createTPFBag.sh`
+
+Script to create an archivable Bag structure from
+object contents in the staging directory.
+
+This script is a wrapper for the `bagmanager` Java application.
+
+```
+Usage: createTPFBag.sh [-r] <staging directory> <archive root directory>
+                          -r:  Replace bag directory if it exists
+           staging directory:  path to top-level staging directory
+                               tree to copy to a bag.
+      archive root directory:  base of the archive directory tree,
+                               where bag will be written
+```
+
+### `copyToRemotes.sh`
+
+Script to copy source directory to one or more remote storage locations.
+
+This script is a wrapper for Rclone.
+
+*Note*:  This script only copies new files and updates exisiting files.
+No files are deleted.
+
+Rclone remote locations are defined in the `Configuration` section at the 
+top of the script.
+
+```
+Usage: copyToRemotes.sh [source directory]
+           source directory:  directory to copy, relative to archive
+                              root directory. If not set, the entire
+                              archive will be copied.
 ```
