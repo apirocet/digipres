@@ -1,0 +1,8 @@
+# List of required directories in archive folder
+# Format:  <directory>|<contents required (yes or no)>
+Audio Poems|yes
+Final Episodes|yes
+Raw Audio Files|yes
+Raw Audio Files/Interview Sources|no
+Rights Data|no
+Transcripts|no
