@@ -1,0 +1,24 @@
+# Sample metadata definition file
+# Format:  field|type|required (yes or no)|dependent-on field
+#  field:              the field to validate (nested fields separated by ".")
+#  type:               type of field (string, date, flag, or file)
+#  required:           is the field required? (yes or no)
+#  dependent-on field: only validate the field if this field is set
+archive_id|string|yes|
+program|string|yes|
+dates_archive_updated|date|yes|
+episodes.title|string|yes|
+episodes.date|date|yes|
+episodes.air_date|date|yes|
+episodes.exec_producer|string|yes|
+episodes.producer|string|yes|
+episodes.published_mp3_file|file|yes
+episodes.source_wav_file|file|no|
+episodes.transcript_pdf_file|file|no|
+episodes.public_flag|flag|yes|
+episodes.public_flag_date|date|yes|
+episodes.in_magazine|flag|yes|
+episodes.magazine_date|date|yes|episodes.in_magazine
+audio_poems.title|string|yes|
+audio_poems.author|string|yes|
+authors.name|string|yes|
