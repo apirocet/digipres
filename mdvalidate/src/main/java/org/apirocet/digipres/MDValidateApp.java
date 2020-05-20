@@ -1,9 +1,14 @@
 package org.apirocet.digipres;
 
+import com.esotericsoftware.yamlbeans.YamlException;
+import com.esotericsoftware.yamlbeans.YamlReader;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 /**
  * This application reads a simple metadata definition file, then validates a metadata file against it.
@@ -42,6 +47,24 @@ public class MDValidateApp implements Callable<Integer> {
 
         MetadataDefinitionReader mdreader = new MetadataDefinitionReader(mddeffile);
         List mddef_list = mdreader.loadMetadataDefinition();
-        return 1;
+
+        YamlReader ymlreader = null;
+        try {
+            ymlreader = new YamlReader(new FileReader(mdfile));
+        } catch (FileNotFoundException e) {
+           System.err.println("Cannot locate yaml file: " + e.getMessage());
+           return 1;
+        }
+
+        Object object = null;
+        try {
+            object = ymlreader.read();
+        } catch (YamlException e) {
+            System.err.println("Cannot parse yaml file: " + e.getMessage());;
+        }
+
+        Map metadata = (Map)object;
+        MetadataValidator mdvalidator = new MetadataValidator(mddef_list, metadata);
+        return mdvalidator.validate() ? 0 : 1;
     }
 }
