@@ -15,6 +15,7 @@ public class MetadataValidator {
 
     private List<MetadataDefinition> mddef_list;
     private Map metadata;
+    private String mdkey;
 
     public MetadataValidator (List<MetadataDefinition> mddef_list, Map metadata) {
         this.mddef_list = mddef_list;
@@ -23,36 +24,44 @@ public class MetadataValidator {
 
     public Boolean validate() {
         for (MetadataDefinition md: mddef_list) {
-            getValue(md.getMdfield(), metadata);
+            mdkey = "";
+            recurseKeys(md.getMdfield(), metadata);
         }
         return true;
     }
 
-    private Object getValue(String mdfield, Object metadata) {
+    private Object recurseKeys(String mdfield, Object metadata) {
         String[] fields = mdfield.split("\\.", 2);
+        mdkey = mdkey.concat(fields[0]);
         if (fields.length == 1) {
             if (metadata instanceof Map) {
-                LOGGER.info(fields[0] + ": ");
                 processvalue(((Map) metadata).get(fields[0]));
             } else if (metadata instanceof ArrayList) {
-                for (Map map : (ArrayList<Map>)metadata) {
-                    LOGGER.info(fields[0] + ": ");
-                    processvalue(map.get(fields[0]));
+                String basekey = mdkey;
+                for (int i = 0; i < ((ArrayList<Map>)metadata).size(); i++) {
+                    int idx = i + 1 ;
+                    mdkey = basekey + "[" + idx + "]";
+                    processvalue((((ArrayList<Map>)metadata).get(i).get(fields[0])));
                 }
             }
         } else {
-            getValue(fields[1], ((Map) metadata).get(fields[0]));
+            mdkey = mdkey.concat(".");
+            recurseKeys(fields[1], ((Map) metadata).get(fields[0]));
         }
         return metadata;
     }
 
     private void processvalue(Object value) {
         if (value instanceof String) {
-            LOGGER.info("  " + (String)value);
+            LOGGER.info(mdkey + ":  " + (String)value);
         } else if (value instanceof ArrayList) {
-            for (String str : (ArrayList<String>) value) {
-                LOGGER.info("  - " + str);
+            for (int i = 0; i < ((ArrayList<String>)value).size(); i++) {
+                int idx = i + 1;
+                String str = ((ArrayList<String>)value).get(i);
+                LOGGER.info(mdkey + "[" + idx + "]: " + str);
             }
+        } else if (value == null) {
+            LOGGER.error(mdkey + ":  MISSING");
         }
     }
 }
