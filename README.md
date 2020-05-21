@@ -21,12 +21,14 @@ A basic workflow consists of the following tasks:
 3. Validate all the files within the folder, to make sure
    the formats are correct, and the files are not corrupted
    (`validateFiles.sh`).
-4. Create a BagIT bag folder from your prepared
+4. Verify the structure of the folder and the metadata file
+   (`verifyContentStructure.sh`)
+5. Create a BagIT bag folder from your prepared
    folder of stuff (`createTPFBag.sh`) in your primary
    archive location.
-5. Copy the Bag folder to other storage platforms for
+6. Copy the Bag folder to other storage platforms for
    redundancy and offsite safekeeping (`copyToRemotes.sh`).
-6. Periodically verify the Bag folder in your primary archive
+7. Periodically verify the Bag folder in your primary archive
    location, other storage locations (`verifyTPFBags.sh`).
 
 ## Dependencies
@@ -85,6 +87,15 @@ checked.  The following third-party tools are used to validate the files:
 **JHove (Version 1.x)** (for WAV and normal PDF file validation):  https://jhove.openpreservation.org/
 
 **VeraPDF** (PDF-A validator):  https://verapdf.org/
+
+### Content and Metadata Verification
+
+The script `verifyContentStructure.sh` verifies the structure and contents
+of the folder to be archived, using the structure definition file
+*project*_structure_def.txt.  It also verifies the contents of the `metadata.txt`
+file, using the metadata validation definition file *project*_metadata_def.txt.
+It is a wrapper script for the underlying `mdvalidate` Java application.  It can 
+be customized to fit an organization's local structures and metadata dictionary.
 
 ### Bag Creation
 
@@ -175,6 +186,18 @@ This script is a wrapper for the following validation tools:
             directory:  path to top-level directory tree to check
 ```
 
+### `verifyContentStructure.sh`
+
+Script to validate the archive folder contents and structure, and verify
+the `metadata.txt` file.  It is a wrapper from the `mdvalidate` Java 
+application.
+
+```
+Usage: ./verifyContentStructure.sh project directory
+          project:    project ID with definition files
+          directory:  path to directory tree to check
+```
+
 ###  `createTPFBag.sh`
 
 Script to create an archivable Bag structure from
@@ -245,6 +268,26 @@ Commands:
   verify  verify the bag
 ```
 
+### `mdvalidate`
+
+Java application to validate the `metadata.txt` file.  See the help
+documentation for the application to run it on its own as a Java jar.
+
+```
+$ java -jar mdvalidate.jar -h
+Usage: mdvalidate [-hV] [-l=<logfile>] <metadata definition file> <metadata
+                  file>
+Command line Metadata Validator 1.0
+      <metadata definition file>
+                            The metadata validator definition file.
+      <metadata file>       The metadata file to validate.
+  -l, --logfile=<logfile>   path to log file (default is mdvalidate.log in
+                              current directory)
+  -h, --help                Show this help message and exit.
+  -V, --version             Print version information and exit.
+
+```
+
 ### `inventory-manager`
 
 Java application to read the inventory spreadsheet.  See the help documentation
@@ -266,6 +309,11 @@ Commands:
 
 * `poetryfoundation-bagit.properties`:  sample BagiT template properties file,
   used by `createTPFBag.sh`.  The location of this file can be set in the script.
+* `poetryfoundation_structure_def.txt`:  sample structure definition file for
+  validating the structure and contents of the archive folder, used by 
+  `verifyContentStructure.sh`.
+* `poetryfoundation_metadata_def.txt`:  sample metadata validation definition file 
+  for validating the `metadata.txt` file, used by `verifyContentStructure.sh`.
 * This README
 
 ## Who do I talk to?
