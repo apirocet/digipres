@@ -64,15 +64,9 @@ public class MDValidateApp implements Callable<Integer> {
             System.err.println("Cannot parse yaml file: " + e.getMessage());
         }
 
-        File dir = null;
         Map metadata = (Map)object;
-        try {
-            dir = new File(mdfile.getCanonicalFile().getParent());
-        } catch (IOException e) {
-            System.err.println("Cannot get archive directory from " + mdfile.getPath() + ": " + e.getMessage());
-        }
 
-        MetadataValidator mdvalidator = new MetadataValidator(mddef_list, metadata, dir);
+        MetadataValidator mdvalidator = new MetadataValidator(mddef_list, metadata, mdfile);
         return mdvalidator.validate() ? 0 : 1;
     }
 }

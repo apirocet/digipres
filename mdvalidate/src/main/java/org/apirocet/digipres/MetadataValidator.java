@@ -4,6 +4,7 @@ import org.apirocet.digipres.model.MetadataDefinition;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -20,16 +21,23 @@ public class MetadataValidator {
 
     private List<MetadataDefinition> mddef_list;
     private Map metadata_doc;
+    private File mdfile;
     private File directory;
     private String display_key;
     private String mdkey;
     private MetadataDefinition mdentry;
     private Boolean is_valid = true;
 
-    public MetadataValidator (List<MetadataDefinition> mddef_list, Map metadata_doc, File directory) {
+    public MetadataValidator (List<MetadataDefinition> mddef_list, Map metadata_doc, File mdfile) {
         this.mddef_list = mddef_list;
         this.metadata_doc = metadata_doc;
-        this.directory = directory;
+        this.mdfile = mdfile;
+        try {
+            directory = new File(mdfile.getCanonicalFile().getParent());
+        } catch (IOException e) {
+            System.err.println("Cannot get archive directory from " + mdfile.getPath() + ": " + e.getMessage());
+            System.exit(1);
+        }
     }
 
     public Boolean validate() {
@@ -39,7 +47,11 @@ public class MetadataValidator {
             mdkey = md.getMdfield();
             recurseKeys(mdkey, metadata_doc);
         }
-        LOGGER.info("Valid: " + is_valid);
+        if (is_valid) {
+            LOGGER.info("Metadata file '" + mdfile.getPath() + "' is valid.");
+        } else {
+            LOGGER.info("Errors encountered:  Metadata file '" + mdfile.getPath() + "' is not valid.");
+        }
         return is_valid;
     }
 
