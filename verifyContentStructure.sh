@@ -72,7 +72,7 @@ then
 fi
 
 dirdef="${mydir}/${prj}${dirstructfile}"
-mddef="${mydir}/${prj}${mdstructile}"
+mddef="${mydir}/${prj}${mdstructfile}"
 
 # Check that we have a valid directory
 ckdir="$2"
@@ -117,6 +117,18 @@ if [ ! -s "${ckdir}/metadata.txt" ]
 then
     errors=("${errors[@]}" "ERROR: metadata check - metadata file '${ckdir}/metadata.txt' is missing")
     errstatus=1
+fi
+
+if ! java -jar mdvalidate.jar -l mdvalidate-$$.log "${mddef}"  "${ckdir}/metadata.txt"
+then
+    errors=("${errors[@]}" "ERROR: metadata check - metadata file '${ckdir}/metadata.txt' is not valid.  See mdvalidate-$$.log for details.")
+    errstatus=1
+fi
+
+if grep WARN mdvalidate-$$.log > /dev/null
+then
+    warnings=("${warnings[@]}" "WARNING: metadata check - metadata file '${ckdir}/metadata.txt' may have problems.  See mdvalidate-$$.log for details.")
+    warnstatus=1
 fi
 
 # Output the summary
