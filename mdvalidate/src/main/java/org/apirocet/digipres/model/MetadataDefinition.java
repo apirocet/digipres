@@ -11,7 +11,6 @@ public class MetadataDefinition {
     private String mdfield;
     private String type;
     private Boolean is_req;
-    private String dep_mdfield;
 
     public String getMdfield() {
         return mdfield;
@@ -37,15 +36,8 @@ public class MetadataDefinition {
         this.is_req = is_req;
     }
 
-    public String getDep_mdfield() {
-        return dep_mdfield;
-    }
-
-    public void setDep_mdfield(String dep_mdfield) {
-        this.dep_mdfield = dep_mdfield;
-    }
 
     public String toString() {
-        return "field = " + mdfield + ", type = " + type + ", isRequired = " + is_req + ", dependent on = " + dep_mdfield;
+        return "field = " + mdfield + ", type = " + type + ", isRequired = " + is_req;
     }
 }

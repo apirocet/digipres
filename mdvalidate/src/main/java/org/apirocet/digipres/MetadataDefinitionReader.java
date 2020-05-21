@@ -76,8 +76,6 @@ public class MetadataDefinitionReader {
                 mdobj.setType(lineScanner.next());
             if (lineScanner.hasNext())
                 mdobj.setIs_req(lineScanner.next().equalsIgnoreCase("yes"));
-            if (lineScanner.hasNext())
-                mdobj.setDep_mdfield(lineScanner.next());
 
             mddef.add(mdobj);
         }

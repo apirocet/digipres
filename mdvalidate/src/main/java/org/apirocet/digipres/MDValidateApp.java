@@ -7,6 +7,7 @@ import picocli.CommandLine;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -60,11 +61,18 @@ public class MDValidateApp implements Callable<Integer> {
         try {
             object = ymlreader.read();
         } catch (YamlException e) {
-            System.err.println("Cannot parse yaml file: " + e.getMessage());;
+            System.err.println("Cannot parse yaml file: " + e.getMessage());
         }
 
+        File dir = null;
         Map metadata = (Map)object;
-        MetadataValidator mdvalidator = new MetadataValidator(mddef_list, metadata);
+        try {
+            dir = new File(mdfile.getCanonicalFile().getParent());
+        } catch (IOException e) {
+            System.err.println("Cannot get archive directory from " + mdfile.getPath() + ": " + e.getMessage());
+        }
+
+        MetadataValidator mdvalidator = new MetadataValidator(mddef_list, metadata, dir);
         return mdvalidator.validate() ? 0 : 1;
     }
 }
