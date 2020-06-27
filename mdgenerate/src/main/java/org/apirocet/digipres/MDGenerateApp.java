@@ -49,6 +49,7 @@ public class MDGenerateApp implements Callable<Integer> {
         SpreadsheetReader sheetreader = new SpreadsheetReader(xlsfile, sheet);
 
         Metadata metadata = sheetreader.getMetadata();
+        System.out.println(metadata.toString());
 
         return 1;
     }
