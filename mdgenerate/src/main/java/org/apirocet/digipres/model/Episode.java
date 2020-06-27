@@ -10,23 +10,23 @@ public class Episode {
     private Date air_date;
     private Date original_date;
     private Date original_air_date;
-    private List<Poet> poets;
+    private List<Author> authors;
     private String exec_producer;
     private String producer;
     private Date rights_expiration_date;
     private String published_mp3_file;
     private String source_wav_file;
     private String transcript_pdf_file;
-    private Boolean public_flag;
-    private Integer pcms_id;
-    private Integer original_pcms_id;
+    private boolean public_flag;
+    private int pcms_id;
+    private int original_pcms_id;
     private String original_archive_id;
-    private Boolean in_magazine;
+    private boolean in_magazine;
     private Date magazine_date;
-    private Integer magazine_pcms_id;
+    private int magazine_pcms_id;
 
     public Episode() {
-        this.poets = new ArrayList<>();
+        this.authors = new ArrayList<>();
     }
 
     public String getTitle() {
@@ -69,22 +69,22 @@ public class Episode {
         this.original_air_date = cloneDate(original_air_date);
     }
 
-    public List<Poet> getPoets() {
-        List<Poet> poet_list = new ArrayList<Poet>();
-        for (Poet poet : this.poets) {
-            poet_list.add((Poet) poet.clone());
+    public List<Author> getAuthors() {
+        List<Author> author_list = new ArrayList<Author>();
+        for (Author author : this.authors) {
+            author_list.add((Author) author.clone());
         }
-        return poet_list;
+        return author_list;
     }
 
-    public void setPoets(List<Poet> poets) {
-        for (Poet poet: poets) {
-            this.poets.add((Poet) poet.clone());
+    public void setAuthors(List<Author> authors) {
+        for (Author author : authors) {
+            this.authors.add((Author) author.clone());
         }
     }
 
-    public void addPoet(Poet poet) {
-        this.poets.add((Poet)poet.clone());
+    public void addAuthor(Author author) {
+        this.authors.add((Author) author.clone());
     }
 
     public String getExecProducer() {
@@ -135,27 +135,27 @@ public class Episode {
         this.transcript_pdf_file = transcript_pdf_file;
     }
 
-    public Boolean getPublicFlag() {
+    public boolean getPublicFlag() {
         return public_flag;
     }
 
-    public void setPublicFlag(Boolean public_flag) {
+    public void setPublicFlag(boolean public_flag) {
         this.public_flag = public_flag;
     }
 
-    public Integer getPcmsId() {
+    public int getPcmsId() {
         return pcms_id;
     }
 
-    public void setPcmsId(Integer pcms_id) {
+    public void setPcmsId(int pcms_id) {
         this.pcms_id = pcms_id;
     }
 
-    public Integer getOriginalPcmsId() {
+    public int getOriginalPcmsId() {
         return original_pcms_id;
     }
 
-    public void setOriginalPcmsId(Integer original_pcms_id) {
+    public void setOriginalPcmsId(int original_pcms_id) {
         this.original_pcms_id = original_pcms_id;
     }
 
@@ -167,11 +167,11 @@ public class Episode {
         this.original_archive_id = original_archive_id;
     }
 
-    public Boolean getInMagazine() {
+    public boolean getInMagazine() {
         return in_magazine;
     }
 
-    public void setInMagazine(Boolean in_magazine) {
+    public void setInMagazine(boolean in_magazine) {
         this.in_magazine = in_magazine;
     }
 
@@ -183,11 +183,11 @@ public class Episode {
         this.magazine_date = cloneDate(magazine_date);
     }
 
-    public Integer getMagazinePcmsId() {
+    public int getMagazinePcmsId() {
         return magazine_pcms_id;
     }
 
-    public void setMagazinePcmsId(Integer pcms_id) {
+    public void setMagazinePcmsId(int pcms_id) {
         this.magazine_pcms_id = magazine_pcms_id;
     }
 
@@ -207,7 +207,7 @@ public class Episode {
         epi_clone.setAirDate(this.air_date);
         epi_clone.setOriginalDate(this.original_date);
         epi_clone.setOriginalAirDate(this.original_air_date);
-        epi_clone.setPoets(this.getPoets());
+        epi_clone.setAuthors(this.getAuthors());
         epi_clone.setExecProducer(this.exec_producer);
         epi_clone.setProducer(this.producer);
         epi_clone.setRightsExpirationDate(this.rights_expiration_date);
@@ -223,5 +223,45 @@ public class Episode {
         epi_clone.setMagazinePcmsId(this.magazine_pcms_id);
 
         return epi_clone;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Title: " + this.title + "\n");
+        if (this.date != null)
+            sb.append("Date: " + this.date.toString() + "\n");
+        if (this.air_date != null)
+            sb.append("Air date: " + this.air_date.toString() + "\n");
+        if (this.original_date != null)
+            sb.append("Air date: " + this.original_date.toString() + "\n");
+        if (this.original_air_date != null)
+            sb.append("Air date: " + this.original_air_date.toString() + "\n");
+        sb.append("Authors:\n");
+        int acount = 0;
+        for (Author author : this.authors) {
+            acount = acount + 1;
+            sb.append("  Author " + acount + "\n");
+            sb.append(author.toString().replaceAll("(?m)^", "    "));
+        }
+        sb.append("Executive producer: " + this.exec_producer + "\n");
+        sb.append("Producer: " + this.producer + "\n");
+        if (this.rights_expiration_date != null)
+            sb.append("Rights expiration date: " + this.rights_expiration_date.toString());
+        sb.append("Published MP3 file: " + this.published_mp3_file + "\n");
+        sb.append("Source WAV file: " + this.source_wav_file + "\n");
+        sb.append("Transcript PDF file: " + this.transcript_pdf_file + "\n");
+        sb.append("Is public? " + this.public_flag + "\n");
+        sb.append("PCMS ID: " + this.pcms_id + "\n");
+        sb.append("Original PCMS ID: " + this.original_pcms_id + "\n");
+        sb.append("Original archive ID: " + this.original_archive_id + "\n");
+        sb.append("In magazine? " + this.in_magazine + "\n");
+        if (this.in_magazine) {
+            if (this.magazine_date != null)
+                sb.append("Magazine date: " + this.magazine_date + "\n");
+            sb.append("Magazine PCMS ID: " + magazine_pcms_id + "\n");
+        }
+
+        return sb.toString();
     }
 }

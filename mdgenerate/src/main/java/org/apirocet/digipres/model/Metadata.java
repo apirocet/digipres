@@ -27,4 +27,13 @@ public class Metadata {
     public void addArchiveObject(ArchiveObject archive_object) {
         this.archive_objects.add((ArchiveObject) archive_object.clone());
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (ArchiveObject archive_object: archive_objects) {
+            sb.append(archive_object.toString().replaceAll("(?m)^", "  "));
+        }
+        return sb.toString();
+    }
 }
