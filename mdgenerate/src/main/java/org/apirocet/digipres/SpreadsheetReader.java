@@ -1,20 +1,15 @@
 package org.apirocet.digipres;
 
-import org.apache.commons.codec.binary.StringUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apirocet.digipres.model.ArchiveObject;
-import org.apirocet.digipres.model.Metadata;
+import org.apirocet.digipres.model.*;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -88,11 +83,13 @@ public class SpreadsheetReader {
     private Metadata readMetadataFromSpreadsheet(Sheet xlssheet) {
         Metadata metadata = new Metadata();
         ArchiveObject archive_object = null;
+        List<Author> authors = null;
+        Episode episode = null;
+        Poem poem = null;
         int rows = xlssheet.getLastRowNum();
         int counter = 0;
         for (int r = 0; r < rows; r++) {
             counter = r;
-
             if (r < 2) { //Skip first two rows:  column headers and notes
                 if (r == 0) {
                     // generate column name map
@@ -105,40 +102,67 @@ public class SpreadsheetReader {
 
             // Blank row is end of spreadsheet
             if (isEmptyRow(row)) {
+                if (archive_object != null)
+                    metadata.addArchiveObject(archive_object);
                 break;
             }
 
-            Integer pcms_id = getMagazinePCMSID(row);
+            int mag_pcms_id = getMagazinePCMSID(row);
             // first row
-            if (archive_object == null && pcms_id == 0) {
+            if (archive_object == null && mag_pcms_id == 0) {
                 LOGGER.error("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.");
                 System.err.println("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.  Exiting.");
                 System.exit(1);
             } else if (archive_object == null) {
                 archive_object = new ArchiveObject();
-                archive_object.setPcmsId(pcms_id);
+                archive_object.setMagazinePcmsId(mag_pcms_id);
                 if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("Creating new Archive object for Magazine PCMS ID " + pcms_id);
-            } else if (pcms_id != 0){ // next archive object
+                    LOGGER.debug("Creating new Archive object for Magazine PCMS ID " + mag_pcms_id);
+            } else if (mag_pcms_id != 0){ // next archive object
                 metadata.addArchiveObject(archive_object);
                 archive_object = new ArchiveObject();
-                archive_object.setPcmsId(pcms_id);
+                archive_object.setMagazinePcmsId(mag_pcms_id);
                 archive_object.setDateArchiveUpdated(new Date());
                 if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("Creating new Archive object for Magazine PCMS ID " + pcms_id);
+                    LOGGER.debug("Creating new Archive object for Magazine PCMS ID " + mag_pcms_id);
             }
 
+            // Process author
+            int author_id = getAuthorPCMSID(row);
             String audio_type = getAudioType(row);
+            if (author_id != 0) {
+                Author author = new Author();
+                author.setPcmsId(author_id);
+                String rights_file = getAuthorRightsFile(row);
+                if (rights_file != null && !rights_file.isEmpty() && !rights_file.equals("NA")) {
+                    author.setRightsFile("Rights Data/" + rights_file);
+                }
+
+                if (! audio_type.isEmpty()) {
+                    authors = new ArrayList<>();
+                }
+
+                if (authors != null)
+                    authors.add(author);
+
+                if (audio_type.isEmpty() && episode != null)
+                    episode.setAuthors(authors);
+
+                archive_object.addAuthor(author);
+            }
+
+            // Process episodes and poems
             switch (audio_type) {
+                case "":
+                    break;
                 case "episode":
-                    System.out.println("Row is episode");
+                    episode = new Episode();
+                    if (authors != null)
+                        episode.setAuthors(authors);
+                    episode.setMagazinePcmsId(mag_pcms_id);
                     break;
                 case "poem":
                     System.out.println("Row is poem");
-                    break;
-                case "":
-                    System.out.println("Audio type is empty");
-                    // check and see if this is a poet row for the previous episode/poem
                     break;
                 default:
                     LOGGER.warn("Cannot determine row " + counter + " audio type.  Skipping row.");
@@ -167,14 +191,20 @@ public class SpreadsheetReader {
         return true;
     }
 
-    private Integer getMagazinePCMSID(Row row) {
-        Integer pcms_id = 0;
-        pcms_id = (int) row.getCell(column_name_map.get("Magazine PCMS ID")).getNumericCellValue();
-        return pcms_id;
+    private int getMagazinePCMSID(Row row) {
+        return (int) row.getCell(column_name_map.get("Magazine PCMS ID")).getNumericCellValue();
     }
 
     private String getAudioType(Row row) {
         return row.getCell(column_name_map.get("Audio Type")).getStringCellValue().toLowerCase();
+    }
+
+    private int getAuthorPCMSID(Row row) {
+        return (int) row.getCell(column_name_map.get("Poet PCMS ID")).getNumericCellValue();
+    }
+
+    private String getAuthorRightsFile(Row row) {
+        return row.getCell(column_name_map.get("Poet Rights File")).getStringCellValue().toLowerCase();
     }
 
     private Map<String, Integer> setColumnMapByName(Row row) {
