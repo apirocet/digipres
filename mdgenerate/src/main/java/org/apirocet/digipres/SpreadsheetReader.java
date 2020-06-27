@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ public class SpreadsheetReader {
 
     private File xlsfile;
     private String sheet;
+    private Map<String, Integer> column_name_map;
 
     public SpreadsheetReader(File xlsfile, String sheet) {
         this.xlsfile = xlsfile;
@@ -86,31 +88,64 @@ public class SpreadsheetReader {
     private Metadata readMetadataFromSpreadsheet(Sheet xlssheet) {
         Metadata metadata = new Metadata();
         ArchiveObject archive_object = null;
-        Map column_name_map = null;
         int rows = xlssheet.getLastRowNum();
         int counter = 0;
         for (int r = 0; r < rows; r++) {
             counter = r;
-            if (r < 3) { //Skip first two rows:  column headers and notes
+
+            if (r < 2) { //Skip first two rows:  column headers and notes
                 if (r == 0) {
                     // generate column name map
                     column_name_map = setColumnMapByName(xlssheet.getRow(r));
-                    System.out.println(column_name_map);
                 }
                 continue;
             }
 
             Row row = xlssheet.getRow(r);
-            if (archive_object == null && getMagazinePCMSID(row) == null) {
-                LOGGER.error("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.");
-                System.err.println("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.  Exiting.");
-                System.exit(1);
-            }
-            
+
+            // Blank row is end of spreadsheet
             if (isEmptyRow(row)) {
                 break;
             }
+
+            Integer pcms_id = getMagazinePCMSID(row);
+            // first row
+            if (archive_object == null && pcms_id == 0) {
+                LOGGER.error("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.");
+                System.err.println("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.  Exiting.");
+                System.exit(1);
+            } else if (archive_object == null) {
+                archive_object = new ArchiveObject();
+                archive_object.setPcmsId(pcms_id);
+                if (LOGGER.isDebugEnabled())
+                    LOGGER.debug("Creating new Archive object for Magazine PCMS ID " + pcms_id);
+            } else if (pcms_id != 0){ // next archive object
+                metadata.addArchiveObject(archive_object);
+                archive_object = new ArchiveObject();
+                archive_object.setPcmsId(pcms_id);
+                archive_object.setDateArchiveUpdated(new Date());
+                if (LOGGER.isDebugEnabled())
+                    LOGGER.debug("Creating new Archive object for Magazine PCMS ID " + pcms_id);
+            }
+
+            String audio_type = getAudioType(row);
+            switch (audio_type) {
+                case "episode":
+                    System.out.println("Row is episode");
+                    break;
+                case "poem":
+                    System.out.println("Row is poem");
+                    break;
+                case "":
+                    System.out.println("Audio type is empty");
+                    // check and see if this is a poet row for the previous episode/poem
+                    break;
+                default:
+                    LOGGER.warn("Cannot determine row " + counter + " audio type.  Skipping row.");
+            }
+
         }
+
         System.out.println("Sheet " + sheet + " has " +  counter + " row(s).");
 
         return metadata;
@@ -133,9 +168,13 @@ public class SpreadsheetReader {
     }
 
     private Integer getMagazinePCMSID(Row row) {
-        Integer pcms_id = null;
-
+        Integer pcms_id = 0;
+        pcms_id = (int) row.getCell(column_name_map.get("Magazine PCMS ID")).getNumericCellValue();
         return pcms_id;
+    }
+
+    private String getAudioType(Row row) {
+        return row.getCell(column_name_map.get("Audio Type")).getStringCellValue().toLowerCase();
     }
 
     private Map<String, Integer> setColumnMapByName(Row row) {
@@ -146,8 +185,6 @@ public class SpreadsheetReader {
                 column_name_map.put(row.getCell(j).getStringCellValue(), j);
             }
         }
-
-        System.out.println(column_name_map);
 
         return column_name_map;
     }

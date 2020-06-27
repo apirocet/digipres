@@ -13,7 +13,7 @@
     </encoder>
   </appender>
 
-  <logger name="org.apirocet.digipres" additivity="false" level="INFO">
+  <logger name="org.apirocet.digipres" additivity="false" level="DEBUG">
     <appender-ref ref="FILE"/>
     <appender-ref ref="CONSOLE"/>
   </logger>

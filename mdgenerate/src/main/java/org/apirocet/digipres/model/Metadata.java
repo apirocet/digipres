@@ -6,6 +6,10 @@ import java.util.List;
 public class Metadata {
     private ArrayList<ArchiveObject> archive_objects;
 
+    public Metadata() {
+        archive_objects = new ArrayList<>();
+    }
+
     public List<ArchiveObject> getArchiveObjects() {
         List<ArchiveObject> ao_list = new ArrayList<ArchiveObject>();
         for (ArchiveObject archiveObject : this.archive_objects) {
