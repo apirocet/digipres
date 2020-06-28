@@ -148,17 +148,17 @@ public class ArchiveObjectModel {
             sb.append("    Episode " + ecount + "\n");
             sb.append(episode.toString().replaceAll("(?m)^", "      "));
         }
-        sb.append("  Authors:\n");
-        for (AuthorModel author : this.authors) {
-            acount = acount + 1;
-            sb.append("    Author " + acount + "\n");
-            sb.append(author.toString().replaceAll("(?m)^", "      "));
-        }
         sb.append("  Poems:\n");
         for (PoemModel poem : this.poems) {
             pcount = pcount + 1;
             sb.append("    Poem " + pcount + "\n");
             sb.append(poem.toString().replaceAll("(?m)^", "      "));
+        }
+        sb.append("  Authors:\n");
+        for (AuthorModel author : this.authors) {
+            acount = acount + 1;
+            sb.append("    Author " + acount + "\n");
+            sb.append(author.toString().replaceAll("(?m)^", "      "));
         }
         return sb.toString();
     }

@@ -1,17 +1,11 @@
 package org.apirocet.digipres.episode;
 
-import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
-import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apirocet.digipres.SpreadsheetReader;
 import org.slf4j.Logger;
 
-import javax.xml.crypto.Data;
-
-import java.text.Format;
 import java.util.Date;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -121,10 +115,7 @@ public class EpisodeMapper {
     }
 
     private String getTitleFromSpreadsheet(Row row) {
-        String title = row.getCell(SpreadsheetReader.getColumnNameMap().get("Title")).getStringCellValue();
-        if (title == null || title.isEmpty())
-            return null;  // get from PCMS
-        return title;
+        return row.getCell(SpreadsheetReader.getColumnNameMap().get("Title")).getStringCellValue();
     }
 
     private int getAudioPcmsId(Row row) {

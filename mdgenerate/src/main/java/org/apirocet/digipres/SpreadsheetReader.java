@@ -9,6 +9,7 @@ import org.apirocet.digipres.author.AuthorMapper;
 import org.apirocet.digipres.episode.EpisodeMapper;
 import org.apirocet.digipres.episode.EpisodeModel;
 import org.apirocet.digipres.metadata.MetadataModel;
+import org.apirocet.digipres.poem.PoemMapper;
 import org.apirocet.digipres.poem.PoemModel;
 import org.slf4j.Logger;
 
@@ -184,7 +185,12 @@ public class SpreadsheetReader {
                         episode.setAuthors(authors);
                     break;
                 case "poem":
-                    System.out.println("Row is poem");
+                    if (poem != null)
+                        archive_object.addPoem(poem);
+                    PoemMapper pm = new PoemMapper();
+                    poem = pm.mapRowToPoem(row);
+                    if (authors != null)
+                        poem.setAuthors(authors);
                     break;
                 default:
                     LOGGER.warn("Cannot determine row " + counter + " audio type.  Skipping row.");

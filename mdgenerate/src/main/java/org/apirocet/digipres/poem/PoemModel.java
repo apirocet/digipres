@@ -16,6 +16,10 @@ public class PoemModel {
     private int text_pcms_id;
     private int audio_poem_pcms_id;
 
+    public PoemModel() {
+        this.authors = new ArrayList<>();
+    }
+
     public String getTitle() {
         return this.title;
     }
@@ -94,7 +98,7 @@ public class PoemModel {
         PoemModel poem_clone = new PoemModel();
 
         poem_clone.setTitle(this.title);
-        poem_clone.setAuthors(this.authors);
+        poem_clone.setAuthors(this.getAuthors());
         poem_clone.setAirDate(this.air_date);
         poem_clone.setMp3File(this.mp3_file);
         poem_clone.setWavFile(this.wav_file);
