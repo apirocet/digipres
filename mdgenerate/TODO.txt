@@ -1,5 +1,4 @@
 TODO:
 
-* Finish reading episode and poem rows into model
 * Get titles, names from PCMS API
 * Write out model in YAML
