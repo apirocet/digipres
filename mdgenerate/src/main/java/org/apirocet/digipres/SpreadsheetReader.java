@@ -1,7 +1,10 @@
 package org.apirocet.digipres;
 
+import org.apache.commons.math3.geometry.spherical.oned.Arc;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apirocet.digipres.mapper.ArchiveObjectMapper;
+import org.apirocet.digipres.mapper.AuthorMapper;
 import org.apirocet.digipres.model.*;
 import org.slf4j.Logger;
 
@@ -24,11 +27,13 @@ public class SpreadsheetReader {
 
     private File xlsfile;
     private String sheet;
-    private Map<String, Integer> column_name_map;
+    private static Map<String, Integer> column_name_map;
+    private static String program;
 
-    public SpreadsheetReader(File xlsfile, String sheet) {
+    public SpreadsheetReader(File xlsfile, String sheet, String program) {
         this.xlsfile = xlsfile;
         this.sheet = sheet;
+        this.program = program;
     }
 
     public Metadata getMetadata() {
@@ -37,6 +42,14 @@ public class SpreadsheetReader {
         Metadata metadata = readMetadataFromSpreadsheet(xlssheet);
 
         return metadata;
+    }
+
+    public static Map<String, Integer> getColumnNameMap() {
+        return column_name_map;
+    }
+
+    public static String getProgram() {
+        return program;
     }
 
     private Sheet getXLSSheet() {
@@ -125,9 +138,9 @@ public class SpreadsheetReader {
                         archive_object.addPoem(poem);
                     metadata.addArchiveObject(archive_object);
                 }
-                archive_object = new ArchiveObject();
-                archive_object.setMagazinePcmsId(mag_pcms_id);
-                archive_object.setDateArchiveUpdated(new Date());
+                ArchiveObjectMapper aom = new ArchiveObjectMapper();
+                archive_object = aom.mapRowToArchiveObject(mag_pcms_id);
+
                 episode = null;
                 poem = null;
                 authors = new ArrayList<>();
@@ -139,12 +152,8 @@ public class SpreadsheetReader {
             int author_id = getAuthorPCMSID(row);
             String audio_type = getAudioType(row);
             if (author_id != 0) {
-                Author author = new Author();
-                author.setPcmsId(author_id);
-                String rights_file = getAuthorRightsFile(row);
-                if (rights_file != null && !rights_file.isEmpty() && !rights_file.equals("NA")) {
-                    author.setRightsFile("Rights Data/" + rights_file);
-                }
+                AuthorMapper am = new AuthorMapper();
+                Author author = am.mapRowToAuthor(row, author_id);
 
                 if (! audio_type.isEmpty()) {
                     authors = new ArrayList<>();
@@ -200,23 +209,19 @@ public class SpreadsheetReader {
         return true;
     }
 
-    private int getMagazinePCMSID(Row row) {
-        return (int) row.getCell(column_name_map.get("Magazine PCMS ID")).getNumericCellValue();
-    }
-
     private String getAudioType(Row row) {
         return row.getCell(column_name_map.get("Audio Type")).getStringCellValue().toLowerCase();
+    }
+
+    private int getMagazinePCMSID(Row row) {
+        return (int) row.getCell(column_name_map.get("Magazine PCMS ID")).getNumericCellValue();
     }
 
     private int getAuthorPCMSID(Row row) {
         return (int) row.getCell(column_name_map.get("Poet PCMS ID")).getNumericCellValue();
     }
 
-    private String getAuthorRightsFile(Row row) {
-        return row.getCell(column_name_map.get("Poet Rights File")).getStringCellValue();
-    }
-
-    private Map<String, Integer> setColumnMapByName(Row row) {
+    private static Map<String, Integer> setColumnMapByName(Row row) {
         Map<String, Integer> column_name_map = new HashMap<String, Integer>();
         int colNum = row.getLastCellNum();
         if (row.cellIterator().hasNext()) {
