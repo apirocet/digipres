@@ -103,6 +103,10 @@ public class SpreadsheetReader {
             // Blank row is end of spreadsheet
             if (isEmptyRow(row)) {
                 if (archive_object != null)
+                    if (episode != null)
+                        archive_object.addEpisode(episode);
+                    if (poem != null)
+                        archive_object.addPoem(poem);
                     metadata.addArchiveObject(archive_object);
                 break;
             }
@@ -113,16 +117,20 @@ public class SpreadsheetReader {
                 LOGGER.error("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.");
                 System.err.println("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.  Exiting.");
                 System.exit(1);
-            } else if (archive_object == null) {
-                archive_object = new ArchiveObject();
-                archive_object.setMagazinePcmsId(mag_pcms_id);
-                if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("Creating new Archive object for Magazine PCMS ID " + mag_pcms_id);
-            } else if (mag_pcms_id != 0){ // next archive object
-                metadata.addArchiveObject(archive_object);
+            } else if (mag_pcms_id != 0) { // next archive object
+                if (archive_object != null) {
+                    if (episode != null)
+                        archive_object.addEpisode(episode);
+                    if (poem != null)
+                        archive_object.addPoem(poem);
+                    metadata.addArchiveObject(archive_object);
+                }
                 archive_object = new ArchiveObject();
                 archive_object.setMagazinePcmsId(mag_pcms_id);
                 archive_object.setDateArchiveUpdated(new Date());
+                episode = null;
+                poem = null;
+                authors = new ArrayList<>();
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug("Creating new Archive object for Magazine PCMS ID " + mag_pcms_id);
             }
@@ -140,13 +148,12 @@ public class SpreadsheetReader {
 
                 if (! audio_type.isEmpty()) {
                     authors = new ArrayList<>();
+                } else if (episode != null) {
+                    episode.addAuthor(author);
                 }
 
                 if (authors != null)
                     authors.add(author);
-
-                if (audio_type.isEmpty() && episode != null)
-                    episode.setAuthors(authors);
 
                 archive_object.addAuthor(author);
             }
@@ -156,6 +163,8 @@ public class SpreadsheetReader {
                 case "":
                     break;
                 case "episode":
+                    if (episode != null)
+                        archive_object.addEpisode(episode);
                     episode = new Episode();
                     if (authors != null)
                         episode.setAuthors(authors);
@@ -204,7 +213,7 @@ public class SpreadsheetReader {
     }
 
     private String getAuthorRightsFile(Row row) {
-        return row.getCell(column_name_map.get("Poet Rights File")).getStringCellValue().toLowerCase();
+        return row.getCell(column_name_map.get("Poet Rights File")).getStringCellValue();
     }
 
     private Map<String, Integer> setColumnMapByName(Row row) {
