@@ -36,6 +36,9 @@ public class MDGenerateApp implements Callable<Integer> {
     @CommandLine.Parameters(index = "1", description = "The name of the sheet to read in the spreadsheet file", paramLabel = "<sheet>")
     private String sheet;
 
+    @CommandLine.Option(names = {"-p", "--program"}, description = "Podcast program name (default is '${DEFAULT-VALUE}')", defaultValue = "Poetry Magazine")
+    private String program;
+
     public static void main( String... args ) {
         int exitCode = new CommandLine(new MDGenerateApp()).execute(args);
         System.exit(exitCode);
@@ -46,7 +49,7 @@ public class MDGenerateApp implements Callable<Integer> {
             System.setProperty("logfile", logfile);
         }
 
-        SpreadsheetReader sheetreader = new SpreadsheetReader(xlsfile, sheet);
+        SpreadsheetReader sheetreader = new SpreadsheetReader(xlsfile, sheet, program);
 
         Metadata metadata = sheetreader.getMetadata();
         System.out.println(metadata.toString());
