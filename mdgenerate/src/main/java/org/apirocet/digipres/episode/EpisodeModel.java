@@ -18,7 +18,7 @@ public class EpisodeModel {
     private Date rights_expiration_date;
     private String published_mp3_file;
     private String source_wav_file;
-    private String transcript_pdf_file;
+    private String transcript_file;
     private boolean public_flag;
     private int pcms_id;
     private int original_pcms_id;
@@ -129,12 +129,12 @@ public class EpisodeModel {
         this.source_wav_file = source_wav_file;
     }
 
-    public String getTranscriptPdfFile() {
-        return transcript_pdf_file;
+    public String getTranscriptFile() {
+        return transcript_file;
     }
 
-    public void setTranscriptPdfFile(String transcript_pdf_file) {
-        this.transcript_pdf_file = transcript_pdf_file;
+    public void setTranscriptFile(String transcript_file) {
+        this.transcript_file = transcript_file;
     }
 
     public boolean getPublicFlag() {
@@ -189,7 +189,7 @@ public class EpisodeModel {
         return magazine_pcms_id;
     }
 
-    public void setMagazinePcmsId(int pcms_id) {
+    public void setMagazinePcmsId(int magazine_pcms_id) {
         this.magazine_pcms_id = magazine_pcms_id;
     }
 
@@ -215,7 +215,7 @@ public class EpisodeModel {
         epi_clone.setRightsExpirationDate(this.rights_expiration_date);
         epi_clone.setPublishedMp3File(this.published_mp3_file);
         epi_clone.setSourceWavFile(this.source_wav_file);
-        epi_clone.setTranscriptPdfFile(this.transcript_pdf_file);
+        epi_clone.setTranscriptFile(this.transcript_file);
         epi_clone.setPublicFlag(this.public_flag);
         epi_clone.setPcmsId(this.pcms_id);
         epi_clone.setOriginalPcmsId(this.original_pcms_id);
@@ -249,10 +249,10 @@ public class EpisodeModel {
         sb.append("Executive producer: " + this.exec_producer + "\n");
         sb.append("Producer: " + this.producer + "\n");
         if (this.rights_expiration_date != null)
-            sb.append("Rights expiration date: " + this.rights_expiration_date.toString());
+            sb.append("Rights expiration date: " + this.rights_expiration_date.toString() + "\n");
         sb.append("Published MP3 file: " + this.published_mp3_file + "\n");
         sb.append("Source WAV file: " + this.source_wav_file + "\n");
-        sb.append("Transcript PDF file: " + this.transcript_pdf_file + "\n");
+        sb.append("Transcript file: " + this.transcript_file + "\n");
         sb.append("Is public? " + this.public_flag + "\n");
         sb.append("PCMS ID: " + this.pcms_id + "\n");
         sb.append("Original PCMS ID: " + this.original_pcms_id + "\n");
@@ -261,7 +261,7 @@ public class EpisodeModel {
         if (this.in_magazine) {
             if (this.magazine_date != null)
                 sb.append("Magazine date: " + this.magazine_date + "\n");
-            sb.append("Magazine PCMS ID: " + magazine_pcms_id + "\n");
+            sb.append("Magazine PCMS ID: " + this.magazine_pcms_id + "\n");
         }
 
         return sb.toString();

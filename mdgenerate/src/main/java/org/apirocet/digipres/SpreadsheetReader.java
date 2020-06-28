@@ -6,6 +6,7 @@ import org.apirocet.digipres.archiveobject.ArchiveObjectModel;
 import org.apirocet.digipres.archiveobject.ArchiveObjectMapper;
 import org.apirocet.digipres.author.AuthorModel;
 import org.apirocet.digipres.author.AuthorMapper;
+import org.apirocet.digipres.episode.EpisodeMapper;
 import org.apirocet.digipres.episode.EpisodeModel;
 import org.apirocet.digipres.metadata.MetadataModel;
 import org.apirocet.digipres.poem.PoemModel;
@@ -177,10 +178,10 @@ public class SpreadsheetReader {
                 case "episode":
                     if (episode != null)
                         archive_object.addEpisode(episode);
-                    episode = new EpisodeModel();
+                    EpisodeMapper em = new EpisodeMapper();
+                    episode = em.mapRowToEpisode(row, archive_object.getMagazinePcmsId());
                     if (authors != null)
                         episode.setAuthors(authors);
-                    episode.setMagazinePcmsId(mag_pcms_id);
                     break;
                 case "poem":
                     System.out.println("Row is poem");

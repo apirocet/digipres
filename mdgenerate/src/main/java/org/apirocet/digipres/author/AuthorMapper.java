@@ -15,7 +15,9 @@ public class AuthorMapper {
 
         author.setPcmsId(author_pcms_id);
         String rights_file = getAuthorRightsFile(row);
-        author.setRightsFile(rights_file);
+
+        if (rights_file != null && ! rights_file.isEmpty())
+            author.setRightsFile("Rights Data/" + rights_file);
 
         return author;
     }
