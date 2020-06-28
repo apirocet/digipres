@@ -1,15 +1,9 @@
 package org.apirocet.digipres;
 
-import com.esotericsoftware.yamlbeans.YamlException;
-import com.esotericsoftware.yamlbeans.YamlReader;
-import org.apirocet.digipres.model.Metadata;
+import org.apirocet.digipres.metadata.MetadataModel;
 import picocli.CommandLine;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
@@ -51,7 +45,7 @@ public class MDGenerateApp implements Callable<Integer> {
 
         SpreadsheetReader sheetreader = new SpreadsheetReader(xlsfile, sheet, program);
 
-        Metadata metadata = sheetreader.getMetadata();
+        MetadataModel metadata = sheetreader.getMetadata();
         System.out.println(metadata.toString());
 
         return 1;

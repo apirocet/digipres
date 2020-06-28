@@ -1,19 +1,23 @@
-package org.apirocet.digipres.model;
+package org.apirocet.digipres.archiveobject;
+
+import org.apirocet.digipres.author.AuthorModel;
+import org.apirocet.digipres.episode.EpisodeModel;
+import org.apirocet.digipres.poem.PoemModel;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ArchiveObject {
+public class ArchiveObjectModel {
     private int mag_pcms_id;
     private String archive_id;
     private String program;
     private Date date_archive_updated;
-    private List<Episode> episodes;
-    private List<Author> authors;
-    private List<Poem> poems;
+    private List<EpisodeModel> episodes;
+    private List<AuthorModel> authors;
+    private List<PoemModel> poems;
 
-    public ArchiveObject() {
+    public ArchiveObjectModel() {
         this.episodes = new ArrayList<>();
         this.authors = new ArrayList<>();
         this.poems = new ArrayList<>();
@@ -58,63 +62,63 @@ public class ArchiveObject {
         }
     }
 
-    public List<Episode> getEpisodes() {
-        List<Episode> episode_list = new ArrayList<Episode>();
-        for (Episode episode : this.episodes) {
-            episode_list.add((Episode) episode.clone());
+    public List<EpisodeModel> getEpisodes() {
+        List<EpisodeModel> episode_list = new ArrayList<EpisodeModel>();
+        for (EpisodeModel episode : this.episodes) {
+            episode_list.add((EpisodeModel) episode.clone());
         }
         return episode_list;
     }
 
-    public void setEpisodes(List<Episode> episodes) {
-        for (Episode episode: episodes) {
-            this.episodes.add((Episode) episode.clone());
+    public void setEpisodes(List<EpisodeModel> episodes) {
+        for (EpisodeModel episode: episodes) {
+            this.episodes.add((EpisodeModel) episode.clone());
         }
     }
 
-    public void addEpisode(Episode episode) {
-        this.episodes.add((Episode)episode.clone());
+    public void addEpisode(EpisodeModel episode) {
+        this.episodes.add((EpisodeModel)episode.clone());
     }
 
-    public List<Author> getAuthors() {
-        List<Author> author_list = new ArrayList<Author>();
-        for (Author author : this.authors) {
-            author_list.add((Author) author.clone());
+    public List<AuthorModel> getAuthors() {
+        List<AuthorModel> author_list = new ArrayList<AuthorModel>();
+        for (AuthorModel author : this.authors) {
+            author_list.add((AuthorModel) author.clone());
         }
         return author_list;
     }
 
-    public void setAuthors(List<Author> authors) {
-        for (Author author: authors) {
-            this.authors.add((Author) author.clone());
+    public void setAuthors(List<AuthorModel> authors) {
+        for (AuthorModel author: authors) {
+            this.authors.add((AuthorModel) author.clone());
         }
     }
 
-    public void addAuthor(Author author) {
-        this.authors.add((Author)author.clone());
+    public void addAuthor(AuthorModel author) {
+        this.authors.add((AuthorModel)author.clone());
     }
 
-    public List<Poem> getPoems() {
-        List<Poem> poem_list = new ArrayList<Poem>();
-        for (Poem poem : this.poems) {
-            poem_list.add((Poem) poem.clone());
+    public List<PoemModel> getPoems() {
+        List<PoemModel> poem_list = new ArrayList<PoemModel>();
+        for (PoemModel poem : this.poems) {
+            poem_list.add((PoemModel) poem.clone());
         }
         return poem_list;
     }
 
-    public void setPoems(List<Poem> poems) {
-        for (Poem poem: poems) {
-            this.poems.add((Poem) poem.clone());
+    public void setPoems(List<PoemModel> poems) {
+        for (PoemModel poem: poems) {
+            this.poems.add((PoemModel) poem.clone());
         }
     }
 
-    public void addPoem(Poem poem) {
-        this.poems.add((Poem)poem.clone());
+    public void addPoem(PoemModel poem) {
+        this.poems.add((PoemModel)poem.clone());
     }
 
     @Override
     public Object clone() {
-        ArchiveObject ao_clone = new ArchiveObject();
+        ArchiveObjectModel ao_clone = new ArchiveObjectModel();
         ao_clone.setArchiveId(this.archive_id);
         ao_clone.setDateArchiveUpdated(this.date_archive_updated);
         ao_clone.setMagazinePcmsId(this.mag_pcms_id);
@@ -139,19 +143,19 @@ public class ArchiveObject {
         int ecount =0;
         int acount =0;
         int pcount =0;
-        for (Episode episode : this.episodes) {
+        for (EpisodeModel episode : this.episodes) {
             ecount = ecount + 1;
             sb.append("    Episode " + ecount + "\n");
             sb.append(episode.toString().replaceAll("(?m)^", "      "));
         }
         sb.append("  Authors:\n");
-        for (Author author : this.authors) {
+        for (AuthorModel author : this.authors) {
             acount = acount + 1;
             sb.append("    Author " + acount + "\n");
             sb.append(author.toString().replaceAll("(?m)^", "      "));
         }
         sb.append("  Poems:\n");
-        for (Poem poem : this.poems) {
+        for (PoemModel poem : this.poems) {
             pcount = pcount + 1;
             sb.append("    Poem " + pcount + "\n");
             sb.append(poem.toString().replaceAll("(?m)^", "      "));

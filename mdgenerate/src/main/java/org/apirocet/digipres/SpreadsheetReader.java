@@ -1,11 +1,14 @@
 package org.apirocet.digipres;
 
-import org.apache.commons.math3.geometry.spherical.oned.Arc;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apirocet.digipres.mapper.ArchiveObjectMapper;
-import org.apirocet.digipres.mapper.AuthorMapper;
-import org.apirocet.digipres.model.*;
+import org.apirocet.digipres.archiveobject.ArchiveObjectModel;
+import org.apirocet.digipres.archiveobject.ArchiveObjectMapper;
+import org.apirocet.digipres.author.AuthorModel;
+import org.apirocet.digipres.author.AuthorMapper;
+import org.apirocet.digipres.episode.EpisodeModel;
+import org.apirocet.digipres.metadata.MetadataModel;
+import org.apirocet.digipres.poem.PoemModel;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -36,10 +39,10 @@ public class SpreadsheetReader {
         this.program = program;
     }
 
-    public Metadata getMetadata() {
+    public MetadataModel getMetadata() {
         Sheet xlssheet = getXLSSheet();
 
-        Metadata metadata = readMetadataFromSpreadsheet(xlssheet);
+        MetadataModel metadata = readMetadataFromSpreadsheet(xlssheet);
 
         return metadata;
     }
@@ -93,12 +96,12 @@ public class SpreadsheetReader {
         return xlssheet;
     }
 
-    private Metadata readMetadataFromSpreadsheet(Sheet xlssheet) {
-        Metadata metadata = new Metadata();
-        ArchiveObject archive_object = null;
-        List<Author> authors = null;
-        Episode episode = null;
-        Poem poem = null;
+    private MetadataModel readMetadataFromSpreadsheet(Sheet xlssheet) {
+        MetadataModel metadata = new MetadataModel();
+        ArchiveObjectModel archive_object = null;
+        List<AuthorModel> authors = null;
+        EpisodeModel episode = null;
+        PoemModel poem = null;
         int rows = xlssheet.getLastRowNum();
         int counter = 0;
         for (int r = 0; r < rows; r++) {
@@ -153,7 +156,7 @@ public class SpreadsheetReader {
             String audio_type = getAudioType(row);
             if (author_id != 0) {
                 AuthorMapper am = new AuthorMapper();
-                Author author = am.mapRowToAuthor(row, author_id);
+                AuthorModel author = am.mapRowToAuthor(row, author_id);
 
                 if (! audio_type.isEmpty()) {
                     authors = new ArrayList<>();
@@ -174,7 +177,7 @@ public class SpreadsheetReader {
                 case "episode":
                     if (episode != null)
                         archive_object.addEpisode(episode);
-                    episode = new Episode();
+                    episode = new EpisodeModel();
                     if (authors != null)
                         episode.setAuthors(authors);
                     episode.setMagazinePcmsId(mag_pcms_id);

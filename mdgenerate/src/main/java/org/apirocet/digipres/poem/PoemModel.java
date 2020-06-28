@@ -1,13 +1,15 @@
-package org.apirocet.digipres.model;
+package org.apirocet.digipres.poem;
+
+import org.apirocet.digipres.author.AuthorModel;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class Poem {
+public class PoemModel {
 
     private String title;
-    private List<Author> authors;
+    private List<AuthorModel> authors;
     private Date air_date;
     private String mp3_file;
     private String wav_file;
@@ -22,22 +24,22 @@ public class Poem {
         this.title = title;
     }
 
-    public List<Author> getAuthors() {
-        List<Author> author_list = new ArrayList<Author>();
-        for (Author author : this.authors) {
-            author_list.add((Author) author.clone());
+    public List<AuthorModel> getAuthors() {
+        List<AuthorModel> author_list = new ArrayList<AuthorModel>();
+        for (AuthorModel author : this.authors) {
+            author_list.add((AuthorModel) author.clone());
         }
         return author_list;
     }
 
-    public void setAuthors(List<Author> authors) {
-        for (Author author : authors) {
-            this.authors.add((Author) author.clone());
+    public void setAuthors(List<AuthorModel> authors) {
+        for (AuthorModel author : authors) {
+            this.authors.add((AuthorModel) author.clone());
         }
     }
 
-    public void addAuthor(Author author) {
-        this.authors.add((Author) author.clone());
+    public void addAuthor(AuthorModel author) {
+        this.authors.add((AuthorModel) author.clone());
     }
 
     public Date getAirDate() {
@@ -89,7 +91,7 @@ public class Poem {
     }
 
     public Object clone() {
-        Poem poem_clone = new Poem();
+        PoemModel poem_clone = new PoemModel();
 
         poem_clone.setTitle(this.title);
         poem_clone.setAuthors(this.authors);
@@ -115,7 +117,7 @@ public class Poem {
         sb.append("Audio PCMS ID: " + this.audio_poem_pcms_id +"\n");
         sb.append("Authors:\n");
         int acount = 0;
-        for (Author author : this.authors) {
+        for (AuthorModel author : this.authors) {
             acount = acount + 1;
             sb.append("  Author " + acount + "\n");
             sb.append(author.toString().replaceAll("(?m)^", "    "));

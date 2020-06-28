@@ -1,6 +1,6 @@
-package org.apirocet.digipres.model;
+package org.apirocet.digipres.author;
 
-public class Author {
+public class AuthorModel {
 
     private String name;
     private int pcms_id;
@@ -32,7 +32,7 @@ public class Author {
 
     @Override
     public Object clone() {
-        Author author_clone = new Author();
+        AuthorModel author_clone = new AuthorModel();
 
         author_clone.setName(this.name);
         author_clone.setPcmsId(this.pcms_id);

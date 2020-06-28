@@ -1,12 +1,8 @@
-package org.apirocet.digipres.mapper;
+package org.apirocet.digipres.author;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apirocet.digipres.SpreadsheetReader;
-import org.apirocet.digipres.model.Author;
 import org.slf4j.Logger;
-
-import java.util.ArrayList;
-import java.util.Map;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -14,8 +10,8 @@ public class AuthorMapper {
 
     private static final Logger LOGGER = getLogger(AuthorMapper.class);
 
-    public Author mapRowToAuthor(Row row, int author_pcms_id) {
-        Author author = new Author();
+    public AuthorModel mapRowToAuthor(Row row, int author_pcms_id) {
+        AuthorModel author = new AuthorModel();
 
         author.setPcmsId(author_pcms_id);
         String rights_file = getAuthorRightsFile(row);
