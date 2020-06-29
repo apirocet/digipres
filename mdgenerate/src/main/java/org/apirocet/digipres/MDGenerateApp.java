@@ -2,6 +2,7 @@ package org.apirocet.digipres;
 
 import org.apirocet.digipres.metadata.MetadataModel;
 import org.apirocet.digipres.pcms.PCMSClient;
+import org.apirocet.digipres.pcms.PCMSDataMapper;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -44,8 +45,8 @@ public class MDGenerateApp implements Callable<Integer> {
             System.setProperty("logfile", logfile);
         }
 
-        PCMSClient pcms_client = PCMSClient.getInstance();
-        pcms_client.getEpisodeTitle(153150);
+        PCMSDataMapper pcms_dm = new PCMSDataMapper();
+        System.out.println(pcms_dm.getEpisodeTitle(153150));
 
         SpreadsheetReader sheetreader = new SpreadsheetReader(xlsfile, sheet, program);
 
