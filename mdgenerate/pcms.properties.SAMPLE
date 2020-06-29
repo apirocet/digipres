@@ -1,0 +1,3 @@
+# PCMS API service client ID and secret
+pcms.id=<YOUR CLIENT ID>
+pcms.secret=<YOUR CLIENT SECRET>

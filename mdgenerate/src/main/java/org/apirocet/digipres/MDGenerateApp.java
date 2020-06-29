@@ -1,6 +1,7 @@
 package org.apirocet.digipres;
 
 import org.apirocet.digipres.metadata.MetadataModel;
+import org.apirocet.digipres.pcms.PCMSClient;
 import picocli.CommandLine;
 
 import java.io.File;
@@ -43,10 +44,13 @@ public class MDGenerateApp implements Callable<Integer> {
             System.setProperty("logfile", logfile);
         }
 
+        PCMSClient pcms_client = PCMSClient.getInstance();
+        pcms_client.getEpisodeTitle(153150);
+
         SpreadsheetReader sheetreader = new SpreadsheetReader(xlsfile, sheet, program);
 
         MetadataModel metadata = sheetreader.getMetadata();
-        System.out.println(metadata.toString());
+        //System.out.println(metadata.toString());
 
         return 1;
     }
