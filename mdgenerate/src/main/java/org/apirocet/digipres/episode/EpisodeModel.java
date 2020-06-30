@@ -8,7 +8,6 @@ import java.util.List;
 
 public class EpisodeModel {
     private String title;
-    private Date date;
     private Date release_date;
     private Date original_release_date;
     private List<AuthorModel> authors;
@@ -38,28 +37,21 @@ public class EpisodeModel {
         this.title = title;
     }
 
-    public Date getDate() {
-        return cloneDate(this.date);
-    }
 
-    public void setDate(Date date) {
-        this.date = cloneDate(date);
-    }
-
-    public Date getAirDate() {
+    public Date getReleaseDate() {
         return cloneDate(this.release_date);
     }
 
-    public void setAirDate(Date air_date) {
-        this.release_date = cloneDate(air_date);
+    public void setReleaseDate(Date release_date) {
+        this.release_date = cloneDate(release_date);
     }
 
-    public Date getOriginalAirDate() {
+    public Date getOriginalReleaseDate() {
         return cloneDate(this.original_release_date);
     }
 
-    public void setOriginalAirDate(Date original_air_date) {
-        this.original_release_date = cloneDate(original_air_date);
+    public void setOriginalReleaseDate(Date original_release_date) {
+        this.original_release_date = cloneDate(original_release_date);
     }
 
     public List<AuthorModel> getAuthors() {
@@ -196,9 +188,8 @@ public class EpisodeModel {
     public Object clone() {
         EpisodeModel epi_clone = new EpisodeModel();
         epi_clone.setTitle(this.title);
-        epi_clone.setDate(this.date);
-        epi_clone.setAirDate(this.release_date);
-        epi_clone.setOriginalAirDate(this.original_release_date);
+        epi_clone.setReleaseDate(this.release_date);
+        epi_clone.setOriginalReleaseDate(this.original_release_date);
         epi_clone.setAuthors(this.getAuthors());
         epi_clone.setExecProducer(this.exec_producer);
         epi_clone.setProducer(this.producer);
@@ -221,8 +212,6 @@ public class EpisodeModel {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Title: " + this.title + "\n");
-        if (this.date != null)
-            sb.append("Date: " + this.date.toString() + "\n");
         if (this.release_date != null)
             sb.append("Release date: " + this.release_date.toString() + "\n");
         if (this.original_release_date != null)

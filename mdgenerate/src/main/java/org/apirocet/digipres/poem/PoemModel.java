@@ -10,7 +10,7 @@ public class PoemModel {
 
     private String title;
     private List<AuthorModel> authors;
-    private Date air_date;
+    private Date latest_release_date;
     private String mp3_file;
     private String wav_file;
     private int text_pcms_id;
@@ -46,12 +46,12 @@ public class PoemModel {
         this.authors.add((AuthorModel) author.clone());
     }
 
-    public Date getAirDate() {
-        return cloneDate(this.air_date);
+    public Date getLatestReleaseDate() {
+        return cloneDate(this.latest_release_date);
     }
 
-    public void setAirDate(Date air_date) {
-        this.air_date = cloneDate(this.air_date);
+    public void setLatestReleaseDate(Date latest_release_date) {
+        this.latest_release_date = cloneDate(latest_release_date);
     }
 
     public String getMp3File() {
@@ -99,7 +99,7 @@ public class PoemModel {
 
         poem_clone.setTitle(this.title);
         poem_clone.setAuthors(this.getAuthors());
-        poem_clone.setAirDate(this.air_date);
+        poem_clone.setLatestReleaseDate(this.latest_release_date);
         poem_clone.setMp3File(this.mp3_file);
         poem_clone.setWavFile(this.wav_file);
         poem_clone.setTextPcmsId(this.text_pcms_id);
@@ -113,8 +113,8 @@ public class PoemModel {
         StringBuilder sb = new StringBuilder();
 
         sb.append("Title: " + this.title + "\n");
-        if (this.air_date != null)
-            sb.append("Air date: " + this.air_date.toString() + "\n");
+        if (this.latest_release_date != null)
+            sb.append("Latest release date: " + this.latest_release_date.toString() + "\n");
         sb.append("Poem MP3 file: " + this.mp3_file + "\n");
         sb.append("Source poem WAV file: " + this.wav_file + "\n");
         sb.append("Text PCMS ID: " + this.text_pcms_id + "\n");

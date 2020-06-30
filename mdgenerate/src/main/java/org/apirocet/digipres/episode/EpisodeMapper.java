@@ -39,16 +39,11 @@ public class EpisodeMapper {
             title = pcms.getEpisodeTitle(audio_pcms_id);
         episode.setTitle(title);
 
-        Date date = getDate(row);
+        Date date = getReleaseDate(row);
         if (date == null && audio_pcms_id !=0)
-            date = pcms.getEpisodeDate(audio_pcms_id);
-        episode.setDate(date);
-
-        Date air_date = getAirDate(row);
-        if (air_date != null)
-            episode.setAirDate(air_date);
-        // otherwise get date from PCMS
-
+            date = pcms.getEpisodeReleaseDate(audio_pcms_id);
+        episode.setReleaseDate(date);
+        
         String exec_producer = getExecProducer(row);
         if (exec_producer != null && ! exec_producer.isEmpty())
             episode.setExecProducer(formatName(getExecProducer(row)));
@@ -74,8 +69,7 @@ public class EpisodeMapper {
         int orig_audio_pcms_id = getOriginalAudioPcmsId(row);
         if (orig_audio_pcms_id != 0) {
             episode.setOriginalPcmsId(orig_audio_pcms_id);
-            episode.setOriginalDate(getOriginalDate(orig_audio_pcms_id));
-            episode.setOriginalAirDate(getOriginalAirDate(orig_audio_pcms_id));
+            episode.setOriginalReleaseDate(getOriginalReleaseDate(orig_audio_pcms_id));
         }
 
         return episode;
@@ -146,12 +140,13 @@ public class EpisodeMapper {
         }
     }
 
-    private Date getDate(Row row) {
+    private Date getReleaseDate(Row row) {
         return row.getCell(SpreadsheetReader.getColumnNameMap().get("Date")).getDateCellValue();
     }
 
-    private Date getAirDate(Row row) {
-        return row.getCell(SpreadsheetReader.getColumnNameMap().get("Date")).getDateCellValue();
+    private Date getOriginalReleaseDate(int orig_audio_pcms_id) {
+        // Get from PCMS
+        return null;
     }
 
     private String getExecProducer(Row row) {
@@ -183,13 +178,4 @@ public class EpisodeMapper {
         return row.getCell(SpreadsheetReader.getColumnNameMap().get("Transcript")).getStringCellValue();
     }
 
-    private Date getOriginalDate(int orig_audio_pcms_id) {
-        // Get from PCMS
-        return null;
-    }
-
-    private Date getOriginalAirDate(int orig_audio_pcms_id) {
-        // Get from PCMS
-        return null;
-    }
 }

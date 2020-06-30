@@ -41,7 +41,7 @@ public class PCMSDataMapper {
         return title;
     }
 
-    public Date getEpisodeDate(int pcms_id) {
+    public Date getEpisodeReleaseDate(int pcms_id) {
         Date date = null;
         String url = BASE_URL + "api/v1/audio/" + pcms_id;
 
