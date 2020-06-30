@@ -9,9 +9,8 @@ import java.util.List;
 public class EpisodeModel {
     private String title;
     private Date date;
-    private Date air_date;
-    private Date original_date;
-    private Date original_air_date;
+    private Date release_date;
+    private Date original_release_date;
     private List<AuthorModel> authors;
     private String exec_producer;
     private String producer;
@@ -48,27 +47,19 @@ public class EpisodeModel {
     }
 
     public Date getAirDate() {
-        return cloneDate(this.air_date);
+        return cloneDate(this.release_date);
     }
 
     public void setAirDate(Date air_date) {
-        this.air_date = cloneDate(air_date);
-    }
-
-    public Date getOriginalDate() {
-        return cloneDate(this.original_date);
-    }
-
-    public void setOriginalDate(Date date) {
-        this.original_date = cloneDate(date);
+        this.release_date = cloneDate(air_date);
     }
 
     public Date getOriginalAirDate() {
-        return cloneDate(this.original_air_date);
+        return cloneDate(this.original_release_date);
     }
 
     public void setOriginalAirDate(Date original_air_date) {
-        this.original_air_date = cloneDate(original_air_date);
+        this.original_release_date = cloneDate(original_air_date);
     }
 
     public List<AuthorModel> getAuthors() {
@@ -206,9 +197,8 @@ public class EpisodeModel {
         EpisodeModel epi_clone = new EpisodeModel();
         epi_clone.setTitle(this.title);
         epi_clone.setDate(this.date);
-        epi_clone.setAirDate(this.air_date);
-        epi_clone.setOriginalDate(this.original_date);
-        epi_clone.setOriginalAirDate(this.original_air_date);
+        epi_clone.setAirDate(this.release_date);
+        epi_clone.setOriginalAirDate(this.original_release_date);
         epi_clone.setAuthors(this.getAuthors());
         epi_clone.setExecProducer(this.exec_producer);
         epi_clone.setProducer(this.producer);
@@ -233,12 +223,10 @@ public class EpisodeModel {
         sb.append("Title: " + this.title + "\n");
         if (this.date != null)
             sb.append("Date: " + this.date.toString() + "\n");
-        if (this.air_date != null)
-            sb.append("Air date: " + this.air_date.toString() + "\n");
-        if (this.original_date != null)
-            sb.append("Air date: " + this.original_date.toString() + "\n");
-        if (this.original_air_date != null)
-            sb.append("Air date: " + this.original_air_date.toString() + "\n");
+        if (this.release_date != null)
+            sb.append("Release date: " + this.release_date.toString() + "\n");
+        if (this.original_release_date != null)
+            sb.append("Original release date: " + this.original_release_date.toString() + "\n");
         sb.append("Authors:\n");
         int acount = 0;
         for (AuthorModel author : this.authors) {

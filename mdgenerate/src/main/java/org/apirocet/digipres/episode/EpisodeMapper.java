@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apirocet.digipres.SpreadsheetReader;
+import org.apirocet.digipres.pcms.PCMSDataMapper;
 import org.slf4j.Logger;
 
 import java.util.Date;
@@ -13,6 +14,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class EpisodeMapper {
 
     private static final Logger LOGGER = getLogger(EpisodeMapper.class);
+    private static final PCMSDataMapper pcms = new PCMSDataMapper();
 
     public EpisodeModel mapRowToEpisode(Row row, int magazine_pcms_id) {
         EpisodeModel episode = new EpisodeModel();
@@ -28,19 +30,19 @@ public class EpisodeMapper {
             episode.setMagazineDate(magazine_date);
         }
 
-        String title = getTitleFromSpreadsheet(row);
-        if (title != null && ! title.isEmpty())
-            episode.setTitle(title);
-        // otherwise, get title from PCMS
-
         int audio_pcms_id = getAudioPcmsId(row);
         if (audio_pcms_id != 0)
             episode.setPcmsId(audio_pcms_id);
 
+        String title = getTitleFromSpreadsheet(row);
+        if ((title == null || title.isEmpty()) && audio_pcms_id != 0)
+            title = pcms.getEpisodeTitle(audio_pcms_id);
+        episode.setTitle(title);
+
         Date date = getDate(row);
-        if (date != null)
-            episode.setDate(date);
-        // otherwise get date from PCMS
+        if (date == null && audio_pcms_id !=0)
+            date = pcms.getEpisodeDate(audio_pcms_id);
+        episode.setDate(date);
 
         Date air_date = getAirDate(row);
         if (air_date != null)

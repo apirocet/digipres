@@ -5,9 +5,11 @@ import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Response;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 public class PCMSDataMapper {
@@ -29,9 +31,30 @@ public class PCMSDataMapper {
         String url = BASE_URL + "api/v1/audio/" + pcms_id;
 
         JSONObject obj = getPCMSData(url);
-        return obj.getJSONArray("entries").getJSONObject(0).getString("title");
+
+        try {
+            title = obj.getJSONArray("entries").getJSONObject(0).getString("title");
+        } catch (JSONException ex) {
+            title = "TITLE NOT FOUND - CHECK PCMS RECORD";
+        }
+
+        return title;
     }
 
+    public Date getEpisodeDate(int pcms_id) {
+        Date date = null;
+        String url = BASE_URL + "api/v1/audio/" + pcms_id;
+
+        JSONObject obj = getPCMSData(url);
+
+        //try {
+        //    date = obj.getJSONArray("entries").getJSONObject(0).getString("title");
+        //} catch (JSONException ex) {
+        //    date = null;
+        //}
+
+        return date;
+    }
     private JSONObject getPCMSData(String url) {
         String json_response = null;
         final OAuthRequest request = new OAuthRequest(Verb.GET, url);
@@ -49,5 +72,4 @@ public class PCMSDataMapper {
         }
         return new JSONObject(json_response);
     }
-
 }

@@ -46,12 +46,11 @@ public class MDGenerateApp implements Callable<Integer> {
         }
 
         PCMSDataMapper pcms_dm = new PCMSDataMapper();
-        System.out.println(pcms_dm.getEpisodeTitle(153150));
 
         SpreadsheetReader sheetreader = new SpreadsheetReader(xlsfile, sheet, program);
 
         MetadataModel metadata = sheetreader.getMetadata();
-        //System.out.println(metadata.toString());
+        System.out.println(metadata.toString());
 
         return 1;
     }
