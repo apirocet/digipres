@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apirocet.digipres.SpreadsheetReader;
+import org.apirocet.digipres.pcms.PCMSDataMapper;
 import org.apirocet.digipres.poem.PoemModel;
 import org.slf4j.Logger;
 
@@ -14,23 +15,25 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class PoemMapper {
 
     private static final Logger LOGGER = getLogger(PoemMapper.class);
+    private static final PCMSDataMapper pcms = new PCMSDataMapper();
 
     public PoemModel mapRowToPoem(Row row) {
         PoemModel poem = new PoemModel();
 
-        String title = getTitleFromSpreadsheet(row);
-        if (title != null && ! title.isEmpty())
-            poem.setTitle(title);
-        // otherwise, get title from PCMS
 
         int audio_pcms_id = getAudioPcmsId(row);
         if (audio_pcms_id != 0)
             poem.setAudioPoemPcmsId(audio_pcms_id);
 
-        Date air_date = getAirDate(row);
-        if (air_date != null)
-            poem.setAirDate(air_date);
-        // otherwise get date from PCMS
+        String title = getTitleFromSpreadsheet(row);
+        if ((title == null || title.isEmpty()) && audio_pcms_id != 0)
+            title = pcms.getAudioTitle(audio_pcms_id);
+        poem.setTitle(title);
+
+        Date latest_release_date = getLatestReleaseDate(row);
+        if (latest_release_date == null && audio_pcms_id != 0)
+            latest_release_date = pcms.getAudioReleaseDate(audio_pcms_id);
+        poem.setLatestReleaseDate(latest_release_date);
 
         String mp3_file = getMP3File(row);
         if (mp3_file != null && ! mp3_file.isEmpty())
@@ -40,7 +43,7 @@ public class PoemMapper {
         if (wav_file != null && ! wav_file.isEmpty())
             poem.setWavFile("Audio Poems/" + wav_file);
 
-        int text_pcms_id = getTextPcmsId(audio_pcms_id);
+        int text_pcms_id = pcms.getAudioTextPoemPcmsId(audio_pcms_id);
         if (text_pcms_id != 0)
             poem.setTextPcmsId(text_pcms_id);
 
@@ -70,7 +73,7 @@ public class PoemMapper {
         return 0;
     }
 
-    private Date getAirDate(Row row) {
+    private Date getLatestReleaseDate(Row row) {
         return row.getCell(SpreadsheetReader.getColumnNameMap().get("Date")).getDateCellValue();
     }
 

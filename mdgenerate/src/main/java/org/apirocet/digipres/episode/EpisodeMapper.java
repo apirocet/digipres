@@ -36,14 +36,14 @@ public class EpisodeMapper {
 
         String title = getTitleFromSpreadsheet(row);
         if ((title == null || title.isEmpty()) && audio_pcms_id != 0)
-            title = pcms.getEpisodeTitle(audio_pcms_id);
+            title = pcms.getAudioTitle(audio_pcms_id);
         episode.setTitle(title);
 
         Date date = getReleaseDate(row);
         if (date == null && audio_pcms_id !=0)
-            date = pcms.getEpisodeReleaseDate(audio_pcms_id);
+            date = pcms.getAudioReleaseDate(audio_pcms_id);
         episode.setReleaseDate(date);
-        
+
         String exec_producer = getExecProducer(row);
         if (exec_producer != null && ! exec_producer.isEmpty())
             episode.setExecProducer(formatName(getExecProducer(row)));
@@ -69,7 +69,7 @@ public class EpisodeMapper {
         int orig_audio_pcms_id = getOriginalAudioPcmsId(row);
         if (orig_audio_pcms_id != 0) {
             episode.setOriginalPcmsId(orig_audio_pcms_id);
-            episode.setOriginalReleaseDate(getOriginalReleaseDate(orig_audio_pcms_id));
+            episode.setOriginalReleaseDate(getPCMSOriginalReleaseDate(orig_audio_pcms_id));
         }
 
         return episode;
@@ -144,9 +144,8 @@ public class EpisodeMapper {
         return row.getCell(SpreadsheetReader.getColumnNameMap().get("Date")).getDateCellValue();
     }
 
-    private Date getOriginalReleaseDate(int orig_audio_pcms_id) {
-        // Get from PCMS
-        return null;
+    private Date getPCMSOriginalReleaseDate(int orig_audio_pcms_id) {
+        return pcms.getAudioReleaseDate(orig_audio_pcms_id);
     }
 
     private String getExecProducer(Row row) {
@@ -162,8 +161,7 @@ public class EpisodeMapper {
     }
 
     private Date getPCMSMagazineDate(int magazine_pcms_id) {
-        // Get from PCMS
-        return null;
+        return pcms.getMagazineDate(magazine_pcms_id);
     }
 
     private String getMP3File(Row row) {

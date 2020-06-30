@@ -198,7 +198,8 @@ public class SpreadsheetReader {
 
         }
 
-        System.out.println("Sheet " + sheet + " has " +  counter + " row(s).");
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug("Sheet " + sheet + " has " +  counter + " row(s).");
 
         return metadata;
     }
