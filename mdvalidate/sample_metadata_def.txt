@@ -12,7 +12,7 @@ episodes.exec_producer|string|yes
 episodes.producer|string|yes
 episodes.published_mp3_file|file|yes
 episodes.source_wav_file|file|no
-episodes.transcript_pdf_file|file|no
+episodes.transcript_file|file|no
 episodes.public_flag|flag|yes
 episodes.in_magazine|flag|yes
 episodes.magazine_date|date|no
