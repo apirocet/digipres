@@ -17,5 +17,5 @@ episodes.public_flag|flag|yes
 episodes.in_magazine|flag|yes
 episodes.magazine_date|date|no
 audio_poems.title|string|yes
-audio_poems.author|string|yes
+audio_poems.authors|string|yes
 authors.name|string|yes
