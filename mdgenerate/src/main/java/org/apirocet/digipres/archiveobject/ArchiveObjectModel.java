@@ -1,5 +1,9 @@
 package org.apirocet.digipres.archiveobject;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apirocet.digipres.author.AuthorModel;
 import org.apirocet.digipres.episode.EpisodeModel;
 import org.apirocet.digipres.poem.PoemModel;
@@ -8,11 +12,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@JsonPropertyOrder({ "archive_id", "program", "episodes", "poems", "authors", "dates_archive_updated" })
 public class ArchiveObjectModel {
     private int mag_pcms_id;
     private String archive_id;
     private String program;
-    private Date date_archive_updated;
+    private List<Date> dates_archive_updated;
+    private Date magazine_date;
     private List<EpisodeModel> episodes;
     private List<AuthorModel> authors;
     private List<PoemModel> poems;
@@ -21,8 +27,10 @@ public class ArchiveObjectModel {
         this.episodes = new ArrayList<>();
         this.authors = new ArrayList<>();
         this.poems = new ArrayList<>();
+        this.dates_archive_updated = new ArrayList<>();
     }
 
+    @JsonIgnore
     public int getMagazinePcmsId() {
         return this.mag_pcms_id;
     }
@@ -47,18 +55,19 @@ public class ArchiveObjectModel {
         this.program = program;
     }
 
-    public Date getDateArchiveUpdated() {
-        if (this.date_archive_updated != null) {
-            return (Date) this.date_archive_updated.clone();
+    @JsonIgnore
+    public Date getMagazineDate() {
+        if (this.magazine_date != null) {
+            return (Date) this.magazine_date.clone();
         }
         return null;
     }
 
-    public void setDateArchiveUpdated(Date date_archive_updated) {
-        if (date_archive_updated != null) {
-            this.date_archive_updated = (Date) date_archive_updated.clone();
+    public void setMagazineDate(Date magazine_date) {
+        if (magazine_date != null) {
+            this.magazine_date = (Date) magazine_date.clone();
         } else {
-            this.date_archive_updated = null;
+            this.magazine_date = null;
         }
     }
 
@@ -116,11 +125,34 @@ public class ArchiveObjectModel {
         this.poems.add((PoemModel)poem.clone());
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    public List<Date> getDatesArchiveUpdated() {
+        List<Date> date_list = new ArrayList<Date>();
+        for (Date date : this.dates_archive_updated) {
+            if (date != null)
+                date_list.add((Date) date.clone());
+        }
+        return date_list;
+    }
+
+    public void setDatesArchiveUpdated(List<Date> dates_archive_updated) {
+        for (Date date: dates_archive_updated) {
+            if (date != null)
+                this.dates_archive_updated.add((Date) date.clone());
+        }
+    }
+
+    public void addDatesArchiveUpdated(Date date) {
+        if (date != null)
+        this.dates_archive_updated.add((Date)date.clone());
+    }
+
     @Override
     public Object clone() {
         ArchiveObjectModel ao_clone = new ArchiveObjectModel();
         ao_clone.setArchiveId(this.archive_id);
-        ao_clone.setDateArchiveUpdated(this.date_archive_updated);
+        ao_clone.setDatesArchiveUpdated(this.dates_archive_updated);
+        ao_clone.setMagazineDate(this.magazine_date);
         ao_clone.setMagazinePcmsId(this.mag_pcms_id);
         ao_clone.setProgram(this.program);
         ao_clone.setEpisodes(this.episodes);
@@ -137,8 +169,17 @@ public class ArchiveObjectModel {
         sb.append("ArchiveID: " + this.archive_id +"\n");
         sb.append("  Program: " + this.program + "\n");
         sb.append("  Magazine PCMS ID: " + this.mag_pcms_id + "\n");
-        if (this.date_archive_updated != null)
-            sb.append("  Date updated: " + this.date_archive_updated.toString() +"\n");
+        int dcount =0;
+        sb.append("  Dates archive updated:\n");
+        for (Date date : this.dates_archive_updated) {
+            dcount = dcount + 1;
+            if (date != null)
+                sb.append("    Date " + dcount + "\n");
+                sb.append(date.toString().replaceAll("(?m)^", "      "));
+                sb.append("\n");
+        }
+        if (this.magazine_date != null)
+            sb.append("  Magazine date: " + this.magazine_date + "\n");
         sb.append("  Episodes:\n");
         int ecount =0;
         int acount =0;

@@ -1,5 +1,9 @@
 package org.apirocet.digipres.author;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({ "name", "pcms_id", "rights_file" })
 public class AuthorModel {
 
     private String name;
@@ -14,6 +18,7 @@ public class AuthorModel {
         this.name = name;
     }
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public int getPcmsId() {
         return pcms_id;
     }

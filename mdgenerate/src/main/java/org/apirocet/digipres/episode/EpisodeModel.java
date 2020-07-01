@@ -1,11 +1,20 @@
 package org.apirocet.digipres.episode;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.apirocet.digipres.author.AuthorConverter;
 import org.apirocet.digipres.author.AuthorModel;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@JsonPropertyOrder({ "title", "release_date", "original_release_date", "authors", "exec_producer", "producer",
+        "rights_expiration_date", "published_mp3_file", "source_wav_file", "transcript_file", "public_flag", "pcms_id",
+        "original_pcms_id", "original_archive_id", "in_magazine", "magazine_date", "magazine_pcms_id" })
 public class EpisodeModel {
     private String title;
     private Date release_date;
@@ -37,7 +46,7 @@ public class EpisodeModel {
         this.title = title;
     }
 
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public Date getReleaseDate() {
         return cloneDate(this.release_date);
     }
@@ -46,6 +55,7 @@ public class EpisodeModel {
         this.release_date = cloneDate(release_date);
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public Date getOriginalReleaseDate() {
         return cloneDate(this.original_release_date);
     }
@@ -54,6 +64,8 @@ public class EpisodeModel {
         this.original_release_date = cloneDate(original_release_date);
     }
 
+    //@JsonIgnoreProperties(value = { "pcms_id", "rights_file" })
+    @JsonSerialize(converter = AuthorConverter.class)
     public List<AuthorModel> getAuthors() {
         List<AuthorModel> author_list = new ArrayList<AuthorModel>();
         for (AuthorModel author : this.authors) {
@@ -88,6 +100,7 @@ public class EpisodeModel {
         this.producer = producer;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public Date getRightsExpirationDate() {
         return cloneDate(this.rights_expiration_date);
     }
@@ -128,6 +141,7 @@ public class EpisodeModel {
         this.public_flag = public_flag;
     }
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public int getPcmsId() {
         return pcms_id;
     }
@@ -136,6 +150,7 @@ public class EpisodeModel {
         this.pcms_id = pcms_id;
     }
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public int getOriginalPcmsId() {
         return original_pcms_id;
     }
@@ -160,6 +175,7 @@ public class EpisodeModel {
         this.in_magazine = in_magazine;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM")
     public Date getMagazineDate() {
         return cloneDate(this.magazine_date);
     }
@@ -168,6 +184,7 @@ public class EpisodeModel {
         this.magazine_date = cloneDate(magazine_date);
     }
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public int getMagazinePcmsId() {
         return magazine_pcms_id;
     }

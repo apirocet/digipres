@@ -180,7 +180,7 @@ public class SpreadsheetReader {
                     if (episode != null)
                         archive_object.addEpisode(episode);
                     EpisodeMapper em = new EpisodeMapper();
-                    episode = em.mapRowToEpisode(row, archive_object.getMagazinePcmsId());
+                    episode = em.mapRowToEpisode(row, archive_object.getMagazinePcmsId(), archive_object.getMagazineDate());
                     if (authors != null)
                         episode.setAuthors(authors);
                     break;

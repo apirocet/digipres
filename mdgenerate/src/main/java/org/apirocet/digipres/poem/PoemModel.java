@@ -1,11 +1,22 @@
 package org.apirocet.digipres.poem;
 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.databind.util.StdConverter;
+import org.apirocet.digipres.author.AuthorConverter;
 import org.apirocet.digipres.author.AuthorModel;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@JsonPropertyOrder({ "title", "latest_release_date", "authors", "mp3_file", "wav_file", "audio_poem_pcms_id",
+        "text_pcms_id" })
 public class PoemModel {
 
     private String title;
@@ -28,6 +39,8 @@ public class PoemModel {
         this.title = title;
     }
 
+    //@JsonIgnoreProperties(value = { "pcms_id", "rights_file" })
+    @JsonSerialize(converter = AuthorConverter.class)
     public List<AuthorModel> getAuthors() {
         List<AuthorModel> author_list = new ArrayList<AuthorModel>();
         for (AuthorModel author : this.authors) {
@@ -46,6 +59,7 @@ public class PoemModel {
         this.authors.add((AuthorModel) author.clone());
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public Date getLatestReleaseDate() {
         return cloneDate(this.latest_release_date);
     }
@@ -70,6 +84,7 @@ public class PoemModel {
         this.wav_file = wav_file;
     }
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public int getTextPcmsId() {
         return this.text_pcms_id;
     }
@@ -78,6 +93,7 @@ public class PoemModel {
         this.text_pcms_id = text_pcms_id;
     }
 
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public int getAudioPoemPcmsId() {
         return this.audio_poem_pcms_id;
     }

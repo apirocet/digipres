@@ -1,12 +1,22 @@
 package org.apirocet.digipres;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.apirocet.digipres.metadata.MetadataModel;
 import org.apirocet.digipres.pcms.PCMSClient;
 import org.apirocet.digipres.pcms.PCMSDataMapper;
+import org.slf4j.Logger;
 import picocli.CommandLine;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.Callable;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * This application generates a metadata file from an Excel spreadsheet.
@@ -20,6 +30,9 @@ import java.util.concurrent.Callable;
         version = "Metadata Generator 1.0",
         description = "Command line Metadata Generator 1.0" )
 public class MDGenerateApp implements Callable<Integer> {
+
+    private static final Logger LOGGER = getLogger(MDGenerateApp.class);
+
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
 
@@ -45,12 +58,11 @@ public class MDGenerateApp implements Callable<Integer> {
             System.setProperty("logfile", logfile);
         }
 
-        PCMSDataMapper pcms_dm = new PCMSDataMapper();
-
         SpreadsheetReader sheetreader = new SpreadsheetReader(xlsfile, sheet, program);
 
         MetadataModel metadata = sheetreader.getMetadata();
-        System.out.println(metadata.toString());
+        YAMLWriter yw =YAMLWriter.getInstance();
+        yw.writeYAML(metadata);
 
         return 1;
     }

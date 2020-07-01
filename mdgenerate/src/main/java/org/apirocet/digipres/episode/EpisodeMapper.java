@@ -1,5 +1,6 @@
 package org.apirocet.digipres.episode;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
@@ -16,7 +17,7 @@ public class EpisodeMapper {
     private static final Logger LOGGER = getLogger(EpisodeMapper.class);
     private static final PCMSDataMapper pcms = new PCMSDataMapper();
 
-    public EpisodeModel mapRowToEpisode(Row row, int magazine_pcms_id) {
+    public EpisodeModel mapRowToEpisode(Row row, int magazine_pcms_id, Date magazine_date) {
         EpisodeModel episode = new EpisodeModel();
 
         episode.setPublicFlag(isPublic(row));
@@ -26,7 +27,6 @@ public class EpisodeMapper {
 
         if (is_in_magazine) {
             episode.setMagazinePcmsId(magazine_pcms_id);
-            Date magazine_date = getPCMSMagazineDate(magazine_pcms_id);
             episode.setMagazineDate(magazine_date);
         }
 
@@ -37,7 +37,7 @@ public class EpisodeMapper {
         String title = getTitleFromSpreadsheet(row);
         if ((title == null || title.isEmpty()) && audio_pcms_id != 0)
             title = pcms.getAudioTitle(audio_pcms_id);
-        episode.setTitle(title);
+        episode.setTitle(StringEscapeUtils.unescapeHtml4(title));
 
         Date date = getReleaseDate(row);
         if (date == null && audio_pcms_id !=0)
