@@ -5,7 +5,6 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apirocet.digipres.SpreadsheetReader;
 import org.apirocet.digipres.pcms.PCMSDataMapper;
-import org.apirocet.digipres.poem.PoemModel;
 import org.slf4j.Logger;
 
 import java.util.Date;
@@ -23,7 +22,7 @@ public class PoemMapper {
 
         int audio_pcms_id = getAudioPcmsId(row);
         if (audio_pcms_id != 0)
-            poem.setAudioPoemPcmsId(audio_pcms_id);
+            poem.setPcmsId(audio_pcms_id);
 
         String title = getTitleFromSpreadsheet(row);
         if ((title == null || title.isEmpty()) && audio_pcms_id != 0)

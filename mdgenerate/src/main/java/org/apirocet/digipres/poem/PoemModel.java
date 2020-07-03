@@ -1,21 +1,15 @@
 package org.apirocet.digipres.poem;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.fasterxml.jackson.databind.util.StdConverter;
 import org.apirocet.digipres.author.AuthorConverter;
 import org.apirocet.digipres.author.AuthorModel;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@JsonPropertyOrder({ "title", "latest_release_date", "authors", "mp3_file", "wav_file", "audio_poem_pcms_id",
+@JsonPropertyOrder({ "title", "latest_release_date", "authors", "mp3_file", "wav_file", "pcms_id",
         "text_pcms_id" })
 public class PoemModel {
 
@@ -25,7 +19,7 @@ public class PoemModel {
     private String mp3_file;
     private String wav_file;
     private int text_pcms_id;
-    private int audio_poem_pcms_id;
+    private int pcms_id;
 
     public PoemModel() {
         this.authors = new ArrayList<>();
@@ -94,12 +88,12 @@ public class PoemModel {
     }
 
     @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-    public int getAudioPoemPcmsId() {
-        return this.audio_poem_pcms_id;
+    public int getPcmsId() {
+        return this.pcms_id;
     }
 
-    public void setAudioPoemPcmsId(int audio_poem_pcms_id) {
-        this.audio_poem_pcms_id = audio_poem_pcms_id;
+    public void setPcmsId(int pcms_id) {
+        this.pcms_id = pcms_id;
     }
 
     private Date cloneDate(Date date) {
@@ -119,7 +113,7 @@ public class PoemModel {
         poem_clone.setMp3File(this.mp3_file);
         poem_clone.setWavFile(this.wav_file);
         poem_clone.setTextPcmsId(this.text_pcms_id);
-        poem_clone.setAudioPoemPcmsId(this.audio_poem_pcms_id);
+        poem_clone.setPcmsId(this.pcms_id);
 
         return poem_clone;
     }
@@ -133,8 +127,8 @@ public class PoemModel {
             sb.append("Latest release date: " + this.latest_release_date.toString() + "\n");
         sb.append("Poem MP3 file: " + this.mp3_file + "\n");
         sb.append("Source poem WAV file: " + this.wav_file + "\n");
+        sb.append("PCMS ID: " + this.pcms_id +"\n");
         sb.append("Text PCMS ID: " + this.text_pcms_id + "\n");
-        sb.append("Audio PCMS ID: " + this.audio_poem_pcms_id +"\n");
         sb.append("Authors:\n");
         int acount = 0;
         for (AuthorModel author : this.authors) {
