@@ -27,7 +27,7 @@ public class AuthorMapper {
         return author;
     }
     private String getAuthorRightsFile(Row row) {
-        return row.getCell(SpreadsheetReader.getColumnNameMap().get("Poet Rights File")).getStringCellValue();
+        return row.getCell(SpreadsheetReader.getColumnNameMap().get("Author Rights File")).getStringCellValue();
     }
 
 }

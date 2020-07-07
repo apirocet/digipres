@@ -52,7 +52,9 @@ public class EpisodeMapper {
         if (producer != null && ! producer.isEmpty())
             episode.setProducer(formatName(getProducer(row)));
 
-        episode.setRightsExpirationDate(getRightsExpirationDate(row));
+        Date rights_exp_date = getRightsExpirationDate(row);
+        if (rights_exp_date != null)
+            episode.setRightsExpirationDate(rights_exp_date);
 
         String mp3_file = getMP3File(row);
         if (mp3_file != null && ! mp3_file.isEmpty())
@@ -157,7 +159,7 @@ public class EpisodeMapper {
     }
 
     private Date getRightsExpirationDate(Row row) {
-        return row.getCell(SpreadsheetReader.getColumnNameMap().get("Date")).getDateCellValue();
+        return row.getCell(SpreadsheetReader.getColumnNameMap().get("Rights Exp Date")).getDateCellValue();
     }
 
     private Date getPCMSMagazineDate(int magazine_pcms_id) {
