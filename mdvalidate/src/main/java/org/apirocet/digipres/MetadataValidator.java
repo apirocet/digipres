@@ -59,13 +59,22 @@ public class MetadataValidator {
         String[] fields = mdfield.split("\\.", 2);
         display_key = display_key.concat(fields[0]);
         if (fields.length == 1) {
+            boolean is_depends_on_set = false;
             if (metadata instanceof Map) {
+                if (mdentry.getDependsOn() != null) {
+                    if (! isSetDependsOnField(((Map) metadata).get(mdentry.getDependsOn())))
+                        return metadata;
+                }
                 is_valid = is_valid & validateValue(((Map) metadata).get(fields[0]));
             } else if (metadata instanceof ArrayList) {
                 String basekey = display_key;
                 for (int i = 0; i < ((ArrayList<Map>)metadata).size(); i++) {
                     int idx = i + 1 ;
                     display_key = basekey + "[" + idx + "]";
+                    if (mdentry.getDependsOn() != null) {
+                        if (! isSetDependsOnField((((ArrayList<Map>)metadata).get(i).get(mdentry.getDependsOn()))))
+                            return metadata;
+                    }
                     is_valid = is_valid & validateValue((((ArrayList<Map>)metadata).get(i).get(fields[0])));
                 }
             }
@@ -145,4 +154,17 @@ public class MetadataValidator {
         return true;
     }
 
+    private boolean isSetDependsOnField(Object value) {
+        boolean is_set = false;
+        if (value instanceof String) {
+            if ( value == null || ((String)value).isBlank() || ((String)value).isEmpty() || "false".equals((String)value)) {
+                is_set = false;
+            } else {
+                is_set = true;
+            }
+        } else if (value instanceof ArrayList && ((ArrayList<Map>)value).size() > 0 ) {
+            is_set = true;
+        }
+        return is_set;
+    }
 }

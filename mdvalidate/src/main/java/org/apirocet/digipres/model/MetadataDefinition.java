@@ -11,6 +11,7 @@ public class MetadataDefinition {
     private String mdfield;
     private String type;
     private Boolean is_req;
+    private String depends_on;
 
     public String getMdfield() {
         return mdfield;
@@ -32,12 +33,19 @@ public class MetadataDefinition {
         return is_req;
     }
 
-    public void setIs_req(Boolean is_req) {
+    public void setIsReq(Boolean is_req) {
         this.is_req = is_req;
     }
 
+    public String getDependsOn() {
+        return depends_on;
+    }
+
+    public void setDependsOn(String depends_on) {
+        this.depends_on = depends_on;
+    }
 
     public String toString() {
-        return "field = " + mdfield + ", type = " + type + ", isRequired = " + is_req;
+        return "field = " + mdfield + ", type = " + type + ", isRequired = " + is_req + ", dependsOn = " + depends_on;
     }
 }

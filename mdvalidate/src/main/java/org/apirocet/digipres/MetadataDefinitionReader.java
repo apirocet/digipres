@@ -3,14 +3,12 @@ package org.apirocet.digipres;
 import org.apirocet.digipres.model.MetadataDefinition;
 import org.slf4j.Logger;
 
-import javax.management.ImmutableDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -75,7 +73,9 @@ public class MetadataDefinitionReader {
             if (lineScanner.hasNext())
                 mdobj.setType(lineScanner.next());
             if (lineScanner.hasNext())
-                mdobj.setIs_req(lineScanner.next().equalsIgnoreCase("yes"));
+                mdobj.setIsReq(lineScanner.next().equalsIgnoreCase("yes"));
+            if (lineScanner.hasNext())
+                mdobj.setDependsOn(lineScanner.next());
 
             mddef.add(mdobj);
         }
