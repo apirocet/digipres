@@ -106,6 +106,8 @@ public class InventoryManagerReader {
 
     private void printColCellValue(String colLabel, Row row, Integer idx) {
         Cell cell = row.getCell(idx);
+        if (cell == null)
+            return;
         System.out.print(colLabel + ": ");
         switch (cell.getCellType()) {
             case STRING:
