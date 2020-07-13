@@ -115,7 +115,7 @@ then
 fi
 
 # Get the UUID
-rawuuid=`grep 'archive_id' "${stgdir}/${mdfile}" | awk '{ print $2 }'`
+rawuuid=`grep 'archive_id' "${stgdir}/${mdfile}" | awk '{ print $2 }' | sed 's/"//g'`
 uuid="${rawuuid//[$'\t\r\n']}"
 if [ "X${uuid}" == "X" ]
 then
