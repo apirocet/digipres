@@ -4,3 +4,4 @@ target/
 *.log
 bagmanager.jar
 inventory-manager.jar
+pcms.properties
