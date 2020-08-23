@@ -101,7 +101,7 @@ do
                else 
                    echo " ${archfile} ${!label}: FAIL"
                    errfiles=("${errfiles[@]}" "${archfile}")
-                   final_status=1
+                   final_status=2
                fi
            else
                echo "${archfile} ${!label}: OK"
