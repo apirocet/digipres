@@ -184,10 +184,10 @@ printf "Files skipped:               %5s\n" $skipped
 printf "Files failed:                %5s\n" $failed
 if [ ${final_status} -eq 2 ]
 then
-    echo "Conversion failed for some files:"
-    printf "    %s\n" "${errfiles[@]}"
+    echo "WARNING: Conversion failed for some files:"
+    printf "WARNING:     %s\n" "${errfiles[@]}"
 else
-    echo "All derivatives are in place."
+    echo "OK: All derivatives are in place."
 fi
 
 rm -rf "${tmpdir}"
