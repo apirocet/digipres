@@ -10,8 +10,8 @@
 # archiving steps.                                                      #
 #                                                                       #
 # Usage:                                                                #
-# createTPFBag.sh [-r] <staging directory> <archive root directory>     #
-#                           -r:  Replace bag directory if it exists     #
+# archiver.sh [-r] <staging directory> <archive root directory>         #
+#                           -r:  Replace bag in archive if it exists    #
 #            staging directory:  path to top-level staging directory    #
 #                                tree to copy to a bag.                 #
 #       archive root directory:  base of the archive directory tree,    #
@@ -40,6 +40,12 @@ arch_root='/archive'
 # Organization key
 orgkey='poetryfoundation'
 
+# Remote stage root
+remote_stage_root='tpfstage:'
+
+# Remote stage root
+remote_archive_root='tpfarchive:'
+
 # Bash colors
 ok='\e[32m\e[1m'
 warn='\e[33m\e[1m'
@@ -53,7 +59,8 @@ declare -A programs=( ["poetrymagazine"]="Poetry Magazine" )
 #-----------------------------------------------------------------------#
 
 usage () {
-    echo "Usage:  $0 -s <staging directory> -p <program key>" 1>&2
+    echo "Usage:  $0 [-r] -s <staging directory> -p <program key>" 1>&2
+    echo "                       -r:  Replace bag in archive if it exists" 1>&2
     echo "        staging directory:  top-level staging directory to be archived, relative to staging drive root." 1>&2
     echo "              program key:  key for the program whose audio resources will be archived." 1>&2
     echo "                            Valid key values are: " 1>&2
@@ -118,7 +125,7 @@ display_messages () {
 #-----------------------------------------------------------------------#
 
 # Get replace flag
-while getopts "hs:p:" options
+while getopts "rhs:p:" options
 do
     case "${options}" in
          s)
@@ -129,6 +136,9 @@ do
              ;;
          h)
              usage
+             ;;
+         r)
+             rflag="-r"
              ;;
          ?)
              usage
@@ -161,7 +171,7 @@ echo "Writing log to ${logfile}"
 
 
 # Step 1:  Create derivatives
-echo "Step 1:  create derivatives" | tee -a ${logfile}
+echo "Step 1: Create derivatives" | tee -a ${logfile}
 $wkdir/createDerivatives.sh "${stagedir}" 2>&1 | sed 's/^/createDerivatives: /' | tee -a ${logfile} | display_messages
 if [ ${PIPESTATUS[0]} -eq 1 ]
 then
@@ -171,7 +181,7 @@ fi
 send_ok "Step 1: Derivatives created."
 
 # Step 2:  Validate files
-echo "Step 2:  validate files" | tee -a ${logfile}
+echo "Step 2: Validate files" | tee -a ${logfile}
 $wkdir/validateFiles.sh "${stagedir}" 2>&1 | sed 's/^/validateFiles: /' | tee -a ${logfile} | display_messages
 if [ ${PIPESTATUS[0]} -eq 1 ]
 then
@@ -182,7 +192,7 @@ send_ok "Step 2: Files validated."
 
 # Step 3:  Generate metadata
 sheet="${stage%-*}"
-echo "Step 3:  generate metadata" | tee -a ${logfile}
+echo "Step 3: Generate metadata" | tee -a ${logfile}
 $wkdir/generateMetadata.sh "${stage_root}/${programs[$program]}/${programs[$program]} Metadata Collection.xlsx" "${sheet}" "${stage}" 2>&1 | sed 's/^/generateMetadata: /' | tee -a ${logfile} | display_messages
 if [ ${PIPESTATUS[0]} -eq 1 -o ${PIPESTATUS[0]} -gt 2 ]
 then
@@ -210,7 +220,7 @@ rm -f metadata-${stage}.yml
 send_ok "Step 3: Metadata generated."
 
 # Step 4:  Verify archive structure and metadata content
-echo "Step 4:  verify metadata content and archive structure" | tee -a ${logfile}
+echo "Step 4: Verify metadata content and archive structure" | tee -a ${logfile}
 $wkdir/verifyContentStructure.sh "${orgkey}" "${stagedir}" 2>&1 | sed 's/^/verifyContentStructure: /' | tee -a ${logfile} | display_messages
 if [ ${PIPESTATUS[0]} -eq 1 ]
 then
@@ -219,4 +229,28 @@ then
 fi
 send_ok "Step 4: Metadata content and archive structure verified."
 
+# Step 5:  Create and archive bag
+echo "Step 5: Create and archive bag" | tee -a ${logfile}
+$wkdir/createTPFBag.sh ${rflag} "${remote_stage_root}${programs[$program]}/${stage}" "${remote_archive_root}" 2>&1 | sed 's/^/createTPFBag: /' | tee -a ${logfile} | display_messages
+if [ ${PIPESTATUS[0]} -eq 1 ]
+then
+    send_err "ERROR: Unable to create and archive bag."
+    exit 1
+fi
+send_ok "Step 5: Bag created and copied to archive."
+
+# Step 6:  Copy to remotes
+archpath=`grep 'Archive path is' "${logfile}" | sed 's/.* //'`
+echo "Step 6: Copy archive to remotes" | tee -a ${logfile}
+$wkdir/copyToRemotes.sh "${remote_archive_root}${archpath}" 2>&1 | sed 's/^/copyToRemotes: /' | tee -a ${logfile} | display_messages
+if [ ${PIPESTATUS[0]} -eq 1 ]
+then
+    send_err "ERROR: Unable to copy archive '${remote_archive_root}${archpath}' to remote storage locations."
+    exit 1
+fi
+send_ok "Step 6: Archive copied to remote storage."
+
+send_ok "Archive process completed."
+
+rm -f md*.log
 exit 0
