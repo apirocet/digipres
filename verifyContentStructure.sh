@@ -144,10 +144,13 @@ then
     printf "    %s\n" "${warnings[@]}"
 fi
 
-if [ ${errstatus} -gt 0 -o ${warnstatus} -gt 0 ]
+if [ ${errstatus} -gt 0 ]
 then
     exit 1
+elif [ ${warnstatus} -gt 0 ]
+then
+    exit 2
 else
-    echo "Directory structure and metadata file OK."
+    echo "OK: Directory structure and metadata file verified."
     exit 0
 fi
