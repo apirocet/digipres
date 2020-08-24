@@ -67,6 +67,6 @@ public class MDGenerateApp implements Callable<Integer> {
         YAMLWriter yw =YAMLWriter.getInstance();
         yw.writeYAML(metadata);
 
-        return 1;
+        return 0;
     }
 }
