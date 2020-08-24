@@ -201,4 +201,6 @@ then
 fi
 echo "Copy complete."
 
+echo "OK: Bag created and archived."
+
 exit 0
