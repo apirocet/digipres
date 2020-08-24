@@ -27,35 +27,87 @@
 # Work directory
 wkdir=`dirname $0`
 
+
+# Log file
+logfile="archiver-`date '+%Y%m%d-%H%M'`.log"
+
+# Stage root directory
+stage_root='/archive-stage'
+
+# Archive root directory
+arch_root='/archive'
+
 # Bash colors
-ok='\e[32'
-warn='\e[33\e[21'
-err='\e[31\e[21'
-reset='\e[0'
+ok='\e[32m\e[1m'
+warn='\e[33m\e[1m'
+err='\e[31m\e[1m'
+reset='\e[0m'
+
+# Programs
+declare -A programs=( ["poetrymagazine"]="Poetry Magazine" )
 #-----------------------------------------------------------------------#
 # Functions                                                             #
 #-----------------------------------------------------------------------#
 
 usage () {
-    echo "Usage:  $0 [-r] <staging directory> <archive root directory>" 1>&2
-    echo "                       -r:  Replace bag directory if it exists" 1>&2
-    echo "        staging directory:  path to top-level staging directory" 1>&2
-    echo "                            tree to copy to a bag." 1>&2
-    echo "   archive root directory:  base of the archive directory tree," 1>&2
-    echo "                            where bag will be written" 1>&2
+    echo "Usage:  $0 -s <staging directory> -p <program key>" 1>&2
+    echo "        staging directory:  top-level staging directory to be archived, relative to staging drive root." 1>&2
+    echo "              program key:  key for the program whose audio resources will be archived." 1>&2
+    echo "                            Valid key values are: " 1>&2
+    for key in "${!programs[@]}"
+    do
+        echo "                                       ${key}" 1>&2
+    done
     exit 1
 }
 
 send_ok () {
-    echo -e "${ok}${1}${reset}"
+    if [ -n "$1" ]
+    then
+        IN="$1"
+    else
+        read IN # This reads a string from stdin and stores it in a variable called IN
+    fi
+
+    echo -e "${ok}${IN}${reset}"
 }
 send_warn () {
-    echo -e "${warn}${1}${reset}"
+    if [ -n "$1" ]
+    then
+        IN="$1"
+    else
+        read IN # This reads a string from stdin and stores it in a variable called IN
+    fi
+
+    echo -e "${warn}${IN}${reset}"
 }
 send_err () {
-    echo -e "${err}${1}${reset}"
-    echo -e "${err}Exiting.${reset}"
-    exit 1
+    if [ -n "$1" ]
+    then
+        IN="$1"
+    else
+        read IN # This reads a string from stdin and stores it in a variable called IN
+    fi
+
+    echo -e "${err}${IN}${reset}"
+}
+
+display_messages () {
+    while read LINE # This reads a string from stdin and stores it in a variable called IN
+    do
+        if echo "$LINE" | grep 'OK:' > /dev/null
+        then
+            send_ok "$LINE"
+        fi
+        if echo "$LINE" | grep 'WARNING:' > /dev/null
+        then
+            send_warn "$LINE"
+        fi
+        if echo "$LINE" | grep 'ERROR:' > /dev/null
+        then
+            send_err "$LINE"
+        fi
+    done
 }
 
 #-----------------------------------------------------------------------#
@@ -63,18 +115,66 @@ send_err () {
 #-----------------------------------------------------------------------#
 
 # Get replace flag
-while getopts "r" options
+while getopts "hs:p:" options
 do
     case "${options}" in
-         r)
-             replace="true"
-             rflag="-r"
+         s)
+             stage="$OPTARG"
+             ;;
+         p)
+             program="$OPTARG"
+             ;;
+         h)
+             usage
+             ;;
+         ?)
+             usage
              ;;
     esac
 done
 shift "$((OPTIND-1))"
 
-# Step 1:  Create derivatives
+if [ "X${stage}" == "X" ]
+then
+    send_err "No staging directory specified."
+    usage
+fi
 
+if [ "X${program}" == "X" -o "X${programs[$program]}" == "X" ]
+then
+    send_err "Program key '${program}' is not a valid key."
+    usage
+fi
+
+stagedir="${stage_root}/${programs[$program]}/${stage}"
+if [ ! -d "${stagedir}" ]
+then
+    send_err "Staging directory '${stagedir}' does not exist."
+    usage
+fi
+
+echo "Archiving contents of $stagedir" | tee -a ${logfile}
+echo "Writing log to ${logfile}"
+
+
+# Step 1:  Create derivatives
+echo "Step 1:  create derivatives" | tee -a ${logfile}
+$wkdir/createDerivatives.sh "${stagedir}" 2>&1 | sed 's/^/createDerivatives: /' | tee -a ${logfile} | display_messages
+if [ ${PIPESTATUS[0]} -eq 1 ]
+then
+    send_err "ERROR: Unable to create derivatives."
+    exit 1
+fi
+send_ok "Step 1: Derivatives created."
+
+# Step 2:  Validate files
+echo "Step 2:  validate files" | tee -a ${logfile}
+$wkdir/validateFiles.sh "${stagedir}" 2>&1 | sed 's/^/validateFiles: /' | tee -a ${logfile} | display_messages
+if [ ${PIPESTATUS[0]} -eq 1 ]
+then
+    send_err "ERROR: Unable to validate files."
+    exit 1
+fi
+send_ok "Step 2: Files validated."
 
 exit 0
