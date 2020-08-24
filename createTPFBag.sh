@@ -162,6 +162,7 @@ fi
 subdirs=$(set_bagpath ${uuid})
 bagpath="${archrootdir}${subdirs}/${uuid}"
 tmpbagpath="${tmpbag_root}${subdirs}/${uuid}"
+echo "Archive path is ${subdirs}/${uuid}"
 if ! mkdir -p "${tmpbag_root}${subdirs}"
 then
     echo "ERROR: Cannot create archive directory '${tmpbag_root}${subdirs}'" 1>&2
