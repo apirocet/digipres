@@ -48,6 +48,18 @@ ag="SHA512"
 # Bag metadata file
 bagmd="../apirocet.github.io/poetryfoundation/poetryfoundation-bagit.properties"
 
+# Rclone staging root
+rclone_stage_root='tpfstage:'
+
+# Rclone archive root
+rclone_archive_root='tpfarchive:'
+
+# Temporary stage data location
+tmpstage_root='/var/tmp/tmpstage'
+
+# Temporary bag data loacation
+tmpbag_root='/var/tmp/tmpbag'
+
 #-----------------------------------------------------------------------#
 # Functions                                                             #
 #-----------------------------------------------------------------------#
@@ -93,57 +105,100 @@ shift "$((OPTIND-1))"
 
 # Check that we have a valid staging directory
 stgdir="$1"
-if [ ! -d "${stgdir}" ]
+tmpstagedir="${tmpstage_root}/${stgdir#*:}"
+
+if ! rclone lsf "${stgdir}" > /dev/null
 then
-    echo "No such staging directory '$stgdir'" 1>&2
+    echo "ERROR: No such directory '${stgdir}'" 1>&2
     usage
+fi
+if ! mkdir -p "${tmpstagedir}"
+then
+    echo "ERROR: Unable to create temporary staging directory '${tmpstagedir}'" 1>&2
+    exit 1
 fi
 
 # Check that we have a valid archive root directory
 archrootdir="$2"
-if [ ! -d "${archrootdir}" ]
+if ! rclone lsf "${archrootdir}" > /dev/null
 then
-    echo "No such archive root directory '$archrootdir'" 1>&2
+    echo "ERROR: No such archive root directory '$archrootdir'" 1>&2
     usage
 fi
+if ! mkdir -p "${tmpbag_root}"
+then
+    echo "ERROR: Unable to create temporary bag directory '${tmpbag_root}'" 1>&2
+    exit 1
+fi
+rm -rf "${tmpbag_root}"/*
+
 
 # Check that we have metadata file
-if [ ! -s "${stgdir}/${mdfile}" ]
+if ! rclone lsf "${stgdir}/${mdfile}" > /dev/null
 then
-    echo "No metadata file found under '${stgdir}'" 1>&2
-    usage
+    echo "ERROR: No metadata file found under '${stgdir}'" 1>&2
+    exit 1
 fi
 
+# Copy the staging dir tree to the local temp tree
+echo "Copying source staging data to temporary work folder..."
+if ! rclone -v sync "${stgdir}" "${tmpstagedir}"
+then
+    echo "ERROR: Unable to copy data under '${stgdir}' to '${tmpstagedir}'" 1>&2
+    exit 1
+fi
+echo "Copy complete."
+
 # Get the UUID
-rawuuid=`grep 'archive_id' "${stgdir}/${mdfile}" | awk '{ print $2 }' | sed 's/"//g'`
+rawuuid=`grep 'archive_id' "${tmpstagedir}/${mdfile}" | awk '{ print $2 }' | sed 's/"//g'`
 uuid="${rawuuid//[$'\t\r\n']}"
 if [ "X${uuid}" == "X" ]
 then
-    echo "Cannot determine object UUId from metadata" 1>&2
+    echo "ERROR: Cannot determine object UUID from metadata" 1>&2
     exit 1
 fi
 
 # Create the Archive path
 subdirs=$(set_bagpath ${uuid})
 bagpath="${archrootdir}${subdirs}/${uuid}"
-if ! mkdir -p "${archrootdir}${subdirs}"
+tmpbagpath="${tmpbag_root}${subdirs}/${uuid}"
+if ! mkdir -p "${tmpbag_root}${subdirs}"
 then
-    echo "Cannot create archive directory '${archrootdir}${subdirs}'" 1>&2
+    echo "ERROR: Cannot create archive directory '${tmpbag_root}${subdirs}'" 1>&2
     exit 1
 fi
 
 # Check if bagpath directory exists
-if [ -d "${bagpath}" -a "X${replace}" != "Xtrue" ]
+if rclone lsf "${bagpath}" > /dev/null 2>&1 && [[ "X${replace}" != "Xtrue" ]]
 then
-    echo "Directory '${bagpath}' exists, will not overwrite" 1>&2
+    echo "ERROR: Archive Directory '${bagpath}' exists, will not overwrite" 1>&2
     exit 1
 fi
 
 # Create the bag
-java -jar "${bagmgr}" write ${rflag} --algorithm=${ag} \
+if ! java -jar "${bagmgr}" write ${rflag} --algorithm=${ag} \
      --metadata-file="${bagmd}" \
      --metadata-fields "External-Identifier=${uuid}" \
-     --outdir="${bagpath}" \
-     "${stgdir}"
+     --outdir="${tmpbagpath}" \
+     "${tmpstagedir}"
+then
+    echo "ERROR:  Unable to create and validate bag at '${tmpbagpath}'."
+    exit 1
+fi
 
-exit $?
+copymode='copy'
+if [ "X${replace}" != "Xtrue" ]
+then
+    copymode='sync'
+fi
+
+# Copy the bag
+echo "Copying created bag to archive..."
+if ! rclone -v ${copymode} "${tmpbagpath}" "${bagpath}"
+then
+    echo "ERROR:  Unable to copy bag at '${tmpbagpath}' to archive location '${bagpath}'."
+    exit 1
+fi
+echo "Copy complete."
+
+exit 0
