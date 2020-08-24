@@ -101,7 +101,7 @@ do
                else 
                    echo " ${archfile} ${!label}: FAIL"
                    errfiles=("${errfiles[@]}" "${archfile}")
-                   final_status=1
+                   final_status=2
                fi
            else
                echo "${archfile} ${!label}: OK"
@@ -114,10 +114,10 @@ done
 # Output the summary
 if [ ${final_status} -gt 0 ]
 then
-    echo "Some files failed to validate:"
-    printf "    %s\n" "${errfiles[@]}"
+    echo "WARNING: Some files failed to validate:"
+    printf "WARNING:    %s\n" "${errfiles[@]}"
 else
-    echo "All files are valid."
+    echo "OK: All files are valid."
 fi
 
 exit ${final_status}
