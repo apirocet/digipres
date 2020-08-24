@@ -177,4 +177,33 @@ then
 fi
 send_ok "Step 2: Files validated."
 
+# Step 3:  Generate metadata
+sheet="${stage%-*}"
+echo "Step 3:  generate metadata" | tee -a ${logfile}
+$wkdir/generateMetadata.sh "${stage_root}/${programs[$program]}/${programs[$program]} Metadata Collection.xlsx" "${sheet}" "${stage}" 2>&1 | sed 's/^/generateMetadata: /' | tee -a ${logfile} | display_messages
+if [ ${PIPESTATUS[0]} -eq 1 -o ${PIPESTATUS[0]} -gt 2 ]
+then
+    send_err "ERROR: Unable to generate metadata."
+    exit 1
+fi
+if [ -s "${stagedir}"/metadata.txt ]
+then
+    echo "Overwriting '${stagedir}/metadata.txt'"
+    orig_archive_id=`grep '^archive_id:' "${stagedir}"/metadata.txt | awk '{ print $2 }'`
+fi
+
+sleep 3
+if ! cp metadata-${stage}.yml "${stagedir}"/metadata.txt
+then
+    send_err "ERROR:  Unable to copy 'metadata-${stage}.yml' to '${stagedir}/metadata.txt'"
+    exit 1
+fi
+if [ "X${orig_archive_id}" != "X" ]
+then
+    sleep 2
+    sed -i "s/^archive_id: .*/archive_id: ${orig_archive_id}/" "${stagedir}"/metadata.txt
+fi
+rm -f metadata-${stage}.yml
+send_ok "Step 3: Metadata generated."
+
 exit 0
