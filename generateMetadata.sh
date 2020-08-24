@@ -8,9 +8,12 @@
 # which reads an Excel spreadsheet updated by Poetry Foundation staff,  #
 # reads the PCMS database, and writes out a metadata file.              #
 #                                                                       #
-# Usage:  generateMetadata.sh file sheet                                #
+# Usage:  generateMetadata.sh file sheet [episode date]                 #
 #            file:  Excel file containing skeletal object information   #
 #            sheet: Sheet in the spreadsheet containing rows to process #
+#            episode_date: Episode date to generate metadata for        #
+#                          (YYYY-MM format) (optional, default will     #
+#                          generate metadata for all episodes in sheet) #
 #                                                                       #
 # July 2020                                                             #
 #-----------------------------------------------------------------------#
@@ -35,9 +38,11 @@ errstatus=0
 #-----------------------------------------------------------------------#
 
 usage () {
-    echo "Usage: $0 file sheet" 1>&2
-    echo "            file:  Excel file containing skeletal object information" 1>&2
-    echo "            sheet: Sheet in the spreadsheet containing rows to process" 1>&2
+    echo "Usage: $0 file sheet [episode date]" 1>&2
+    echo "                    file: Excel file containing skeletal object information" 1>&2
+    echo "                   sheet: Sheet in the spreadsheet containing rows to process" 1>&2
+    echo "            episode_date: Episode date to generate metadata for (YYYY-MM format)" 1>&2
+    echo "                          (optional, default will generate metadata for all episodes in sheet)" 1>&2
     exit 1
 }
 
@@ -46,18 +51,30 @@ usage () {
 #-----------------------------------------------------------------------#
 
 # Check that we have the right number of arguments
-if [ "$#" -ne 2 ]
+if [ "$#" -lt 2 -o "$#" -gt 3 ]
 then
     usage
 fi
 
 excelfile="$1"
 sheet="$2"
+if [ "X$3" != "X" ]
+then
+    episode_date="-d $3"
+fi
+
 
 # Generate the metadata
-if ! java -Dlogfile=mdgenerate-$$.log -jar mdgenerate.jar -l mdgenerate-$$.log "${excelfile}"  "${sheet}"
+java -Dlogfile=mdgenerate-$$.log -jar mdgenerate.jar -l mdgenerate-$$.log ${episode_date} "${excelfile}"  "${sheet}"
+if [ "$?" -eq 1 ]
 then
-    errors=("${errors[@]}" "ERROR: metadata could not be generated.  See mdgenerate-$$.log for details.")
+    if [ -s mdgenerate-$$.log ]
+    then
+        errors=("${errors[@]}" "ERROR: metadata could not be generated.  See mdgenerate-$$.log for details.")
+    else
+        errors=("${errors[@]}" "ERROR: metadata could not be generated.")
+    fi
+
     errstatus=1
 fi
 
@@ -83,10 +100,15 @@ then
     printf "    %s\n" "${warnings[@]}"
 fi
 
-if [ ${errstatus} -gt 0 -o ${warnstatus} -gt 0 ]
+if [ ${errstatus} -gt 0 ]
 then
     exit 1
-else
-    echo "Metadata file(s) generated."
-    exit 0
 fi
+
+if [ ${warnstatus} -gt 0 ]
+then
+    exit 2
+fi
+
+echo "OK: Metadata file(s) generated."
+exit 0
