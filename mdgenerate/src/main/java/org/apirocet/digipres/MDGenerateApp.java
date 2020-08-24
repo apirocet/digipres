@@ -48,6 +48,9 @@ public class MDGenerateApp implements Callable<Integer> {
     @CommandLine.Option(names = {"-p", "--program"}, description = "Podcast program name (default is '${DEFAULT-VALUE}')", defaultValue = "Poetry Magazine")
     private String program;
 
+    @CommandLine.Option(names = {"-d", "--date"}, description = "Podcast episode date to generate metadata for (default is all podcasts in sheet)")
+    private String episode_date;
+
     public static void main( String... args ) {
         int exitCode = new CommandLine(new MDGenerateApp()).execute(args);
         System.exit(exitCode);
@@ -58,7 +61,7 @@ public class MDGenerateApp implements Callable<Integer> {
             System.setProperty("logfile", logfile);
         }
 
-        SpreadsheetReader sheetreader = new SpreadsheetReader(xlsfile, sheet, program);
+        SpreadsheetReader sheetreader = new SpreadsheetReader(xlsfile, sheet, program, episode_date);
 
         MetadataModel metadata = sheetreader.getMetadata();
         YAMLWriter yw =YAMLWriter.getInstance();

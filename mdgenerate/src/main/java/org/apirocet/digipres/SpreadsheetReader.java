@@ -17,6 +17,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -34,11 +37,21 @@ public class SpreadsheetReader {
     private String sheet;
     private static Map<String, Integer> column_name_map;
     private static String program;
+    private static Date episode_date;
 
-    public SpreadsheetReader(File xlsfile, String sheet, String program) {
+    public SpreadsheetReader(File xlsfile, String sheet, String program, String episode_date) {
         this.xlsfile = xlsfile;
         this.sheet = sheet;
         this.program = program;
+        if (episode_date != null && !episode_date.isEmpty()) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM", Locale.ENGLISH);
+            try {
+                this.episode_date = formatter.parse(episode_date);
+            } catch (ParseException ex) {
+                System.err.println("Cannot parse date '" + episode_date + "'.  Exiting.");
+                System.exit(1);
+            }
+        }
     }
 
     public MetadataModel getMetadata() {
@@ -106,6 +119,7 @@ public class SpreadsheetReader {
         PoemModel poem = null;
         int rows = xlssheet.getLastRowNum();
         int counter = 0;
+        boolean skip = false;
         for (int r = 0; r < rows; r++) {
             counter = r;
             if (r < 2) { //Skip first two rows:  column headers and notes
@@ -120,22 +134,6 @@ public class SpreadsheetReader {
 
             // Blank row is end of spreadsheet
             if (isEmptyRow(row)) {
-                if (archive_object != null)
-                    if (episode != null)
-                        archive_object.addEpisode(episode);
-                    if (poem != null)
-                        archive_object.addPoem(poem);
-                    metadata.addArchiveObject(archive_object);
-                break;
-            }
-
-            int mag_pcms_id = getMagazinePCMSID(row);
-            // first row
-            if (archive_object == null && mag_pcms_id == 0) {
-                LOGGER.error("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.");
-                System.err.println("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.  Exiting.");
-                System.exit(1);
-            } else if (mag_pcms_id != 0) { // next archive object
                 if (archive_object != null) {
                     if (episode != null)
                         archive_object.addEpisode(episode);
@@ -143,6 +141,35 @@ public class SpreadsheetReader {
                         archive_object.addPoem(poem);
                     metadata.addArchiveObject(archive_object);
                 }
+                break;
+            }
+
+            int mag_pcms_id = getMagazinePCMSID(row);
+            Date current_episode_date = getEpisodeDate(row);
+            // first row
+            if (r == 2 && archive_object == null && mag_pcms_id == 0) {
+                LOGGER.error("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.");
+                System.err.println("Sheet '" + sheet +"' in file '" + xlsfile + "' does not start off with a Magazine PCMS ID.  Exiting.");
+                System.exit(1);
+            } else if (mag_pcms_id != 0) {
+                if (episode_date != null && current_episode_date != null && ! inSameMonth(episode_date, current_episode_date)) {
+                    skip = true;
+                } else if (episode_date != null && current_episode_date != null && inSameMonth(episode_date, current_episode_date)) {
+                    skip = false;
+                }
+
+                if (skip)
+                    continue;
+
+                // next archive object
+                if (archive_object != null) {
+                    if (episode != null)
+                        archive_object.addEpisode(episode);
+                    if (poem != null)
+                        archive_object.addPoem(poem);
+                    metadata.addArchiveObject(archive_object);
+                }
+
                 ArchiveObjectMapper aom = new ArchiveObjectMapper();
                 archive_object = aom.mapRowToArchiveObject(mag_pcms_id);
 
@@ -152,6 +179,9 @@ public class SpreadsheetReader {
                 if (LOGGER.isDebugEnabled())
                     LOGGER.debug("Creating new Archive object for Magazine PCMS ID " + mag_pcms_id);
             }
+
+            if (skip)
+                continue;
 
             // Process author
             int author_id = getAuthorPCMSID(row);
@@ -232,6 +262,10 @@ public class SpreadsheetReader {
         return (int) row.getCell(column_name_map.get("Poet PCMS ID")).getNumericCellValue();
     }
 
+    private Date getEpisodeDate(Row row) {
+        return row.getCell(SpreadsheetReader.getColumnNameMap().get("Date")).getDateCellValue();
+    }
+
     private static Map<String, Integer> setColumnMapByName(Row row) {
         Map<String, Integer> column_name_map = new HashMap<String, Integer>();
         int colNum = row.getLastCellNum();
@@ -242,5 +276,14 @@ public class SpreadsheetReader {
         }
 
         return column_name_map;
+    }
+
+    private boolean inSameMonth(Date date1, Date date2) {
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTime(date1);
+        cal2.setTime(date2);
+        return cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
+                cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR);
     }
 }
