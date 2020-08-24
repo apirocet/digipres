@@ -37,6 +37,9 @@ stage_root='/archive-stage'
 # Archive root directory
 arch_root='/archive'
 
+# Organization key
+orgkey='poetryfoundation'
+
 # Bash colors
 ok='\e[32m\e[1m'
 warn='\e[33m\e[1m'
@@ -205,5 +208,15 @@ then
 fi
 rm -f metadata-${stage}.yml
 send_ok "Step 3: Metadata generated."
+
+# Step 4:  Verify archive structure and metadata content
+echo "Step 4:  verify metadata content and archive structure" | tee -a ${logfile}
+$wkdir/verifyContentStructure.sh "${orgkey}" "${stagedir}" 2>&1 | sed 's/^/verifyContentStructure: /' | tee -a ${logfile} | display_messages
+if [ ${PIPESTATUS[0]} -eq 1 ]
+then
+    send_err "ERROR: Unable to verify metadata content and archive structure."
+    exit 1
+fi
+send_ok "Step 4: Metadata content and archive structure verified."
 
 exit 0
